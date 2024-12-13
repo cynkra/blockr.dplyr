@@ -25,8 +25,6 @@ new_join_block <- function(type = character(), by = character(), ...) {
     type <- join_types[1L]
   }
 
-  by_opts <- by
-
   new_transform_block(
     function(x, y) {
       moduleServer(
@@ -71,7 +69,7 @@ new_join_block <- function(type = character(), by = character(), ...) {
         }
       )
     },
-    function(ns) {
+    function(ns, type, by, by_opts = character()) {
       tagList(
         selectInput(
           inputId = ns("expression", "type"),

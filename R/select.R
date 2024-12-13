@@ -9,8 +9,6 @@
 #' @export
 new_select_block <- function(columns = character(), ...) {
 
-  choices <- columns
-
   new_transform_block(
     function(data) {
       moduleServer(
@@ -47,7 +45,7 @@ new_select_block <- function(columns = character(), ...) {
         }
       )
     },
-    function(ns) {
+    function(ns, columns, choices = character()) {
       selectInput(
         inputId = ns("expression", "columns"),
         label = "Columns",
