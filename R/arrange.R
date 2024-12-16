@@ -16,8 +16,7 @@ new_arrange_block <- function(columns = character(), ...) {
           sels <- reactiveVal(columns)
           cols <- reactive(colnames(data()))
 
-          reactive(sels(input$columns)) |>
-            bindEvent(input$columns)
+          observeEvent(input$columns, sels(input$columns))
 
           observe(
             updateSelectInput(
