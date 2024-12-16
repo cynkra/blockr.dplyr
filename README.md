@@ -5,6 +5,7 @@
 
 <!-- badges: start -->
 
+[![check](https://github.com/cynkra/blockr.dplyr/actions/workflows/check.yaml/badge.svg)](https://github.com/cynkra/blockr.dplyr/actions/workflows/check.yaml)
 <!-- badges: end -->
 
 Extending `blockr.core` with blocks for data wrangling, `blockr.dplyr`
