@@ -4,10 +4,12 @@
 \alias{new_arrange_block}
 \title{Arrange block constructor}
 \usage{
-new_arrange_block(columns = character(), ...)
+new_arrange_block(columns = character(), desc = logical(), ...)
 }
 \arguments{
 \item{columns}{Columns to arrange by.}
+
+\item{desc}{Should columns be sorted in descending order?}
 
 \item{...}{Forwarded to \code{\link[=new_block]{new_block()}}}
 }
