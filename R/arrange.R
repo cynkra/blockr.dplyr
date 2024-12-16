@@ -4,10 +4,11 @@
 #' of selected columns (see [dplyr::arrange()]).
 #'
 #' @param columns Columns to arrange by.
+#' @param desc Should columns be sorted in descending order?
 #' @param ... Forwarded to [new_block()]
 #'
 #' @export
-new_arrange_block <- function(columns = character(), ...) {
+new_arrange_block <- function(columns = character(), desc = logical(), ...) {
   new_transform_block(
     function(data) {
       moduleServer(
@@ -29,11 +30,19 @@ new_arrange_block <- function(columns = character(), ...) {
 
           list(
             expr = reactive(
-              bquote(
-                dplyr::arrange(data, ..(vars)),
-                list(vars = lapply(sels(), as.name)),
-                splice = TRUE
-              )
+              if (input$desc == "True") {
+                bquote(
+                  dplyr::arrange(data, dplyr::desc(..(vars))),
+                  list(vars = lapply(sels(), as.name)),
+                  splice = TRUE
+                )
+              } else {
+                bquote(
+                  dplyr::arrange(data, ..(vars)),
+                  list(vars = lapply(sels(), as.name)),
+                  splice = TRUE
+                )
+              }
             ),
             state = list(
               columns = reactive(sels()),
@@ -43,13 +52,21 @@ new_arrange_block <- function(columns = character(), ...) {
         }
       )
     },
-    function(ns, columns, choices = character()) {
-      selectInput(
-        ns("expression", "columns"),
-        label = "Arrange by:",
-        choices = choices,
-        selected = columns,
-        multiple = TRUE
+    function(ns, columns, desc, choices = character()) {
+      tagList(
+        selectInput(
+          ns("expression", "columns"),
+          label = "Arrange by:",
+          choices = choices,
+          selected = columns,
+          multiple = TRUE
+        ),
+        selectInput(
+          ns("expression", "desc"),
+          label = "Sort in descending order?",
+          choices = c("True", "False"),
+          selected = "False"
+        )
       )
     },
     class = "arrange_block",
