@@ -9,10 +9,10 @@
 #' @export
 new_arrange_block <- function(columns = character(), ...) {
   new_transform_block(
-    function() {
+    function(data) {
       server <- moduleServer(
         "arrange_expr",
-        function(input, output, server) {
+        function(input, output, session) {
           arrange_by <- reactiveVal(columns)
           choices <- reactive(colnames(data()))
 
