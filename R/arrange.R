@@ -8,12 +8,18 @@
 #' @param ... Forwarded to [new_block()]
 #'
 #' @export
-new_arrange_block <- function(columns = character(), desc = logical(), ...) {
+new_arrange_block <- function(columns = character(), desc = "False", ...) {
+
+  desc_opts <- c("True", "False")
+
+  desc <- match.arg(desc, desc_opts)
+
   new_transform_block(
     function(data) {
       moduleServer(
         "expression",
         function(input, output, session) {
+
           sels <- reactiveVal(columns)
           cols <- reactive(colnames(data()))
 
@@ -46,7 +52,8 @@ new_arrange_block <- function(columns = character(), desc = logical(), ...) {
             ),
             state = list(
               columns = reactive(sels()),
-              choices = reactive(cols())
+              choices = reactive(cols()),
+              desc = reactive(input$desc)
             )
           )
         }
@@ -64,8 +71,8 @@ new_arrange_block <- function(columns = character(), desc = logical(), ...) {
         selectInput(
           ns("expression", "desc"),
           label = "Sort in descending order?",
-          choices = c("True", "False"),
-          selected = "False"
+          choices = desc_opts,
+          selected = desc
         )
       )
     },

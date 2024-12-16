@@ -4,7 +4,7 @@
 \alias{new_arrange_block}
 \title{Arrange block constructor}
 \usage{
-new_arrange_block(columns = character(), desc = logical(), ...)
+new_arrange_block(columns = character(), desc = "False", ...)
 }
 \arguments{
 \item{columns}{Columns to arrange by.}
