@@ -10,21 +10,21 @@
 new_arrange_block <- function(columns = character(), ...) {
   new_transform_block(
     function(data) {
-      server <- moduleServer(
-        "arrange_expr",
+      moduleServer(
+        "expression",
         function(input, output, session) {
-          arrange_by <- reactiveVal(columns)
-          choices <- reactive(colnames(data()))
+          sels <- reactiveVal(columns)
+          cols <- reactive(colnames(data()))
 
-          arrange_by(input$columns) |>
+          reactive(sels(input$columns)) |>
             bindEvent(input$columns)
 
           observe(
             updateSelectInput(
               session,
               inputId = "columns",
-              choices = choices(),
-              selected = arrange_by()
+              choices = cols(),
+              selected = sels()
             )
           )
 
@@ -32,21 +32,21 @@ new_arrange_block <- function(columns = character(), ...) {
             expr = reactive(
               bquote(
                 dplyr::arrange(data, ..(vars)),
-                list(vars = lapply(arrange_by(), as.name)),
+                list(vars = lapply(sels(), as.name)),
                 splice = TRUE
               )
             ),
             state = list(
-              columns = reactive(arrange_by()),
-              choices = reactive(choices())
+              columns = reactive(sels()),
+              choices = reactive(cols())
             )
           )
         }
       )
     },
-    ui = function(ns, columns, choices = character()) {
+    function(ns, columns, choices = character()) {
       selectInput(
-        ns("arrange_expr", "dataset"),
+        ns("expression", "columns"),
         label = "Arrange by:",
         choices = choices,
         selected = columns,
