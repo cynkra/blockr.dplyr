@@ -1,7 +1,11 @@
-#' Key Value Field server
+#' Key-value server module
 #'
-#' Server module
+#' @param id The module ID
+#' @param submit Whether to show a submit button (defaults to TRUE)
+#' @param multiple Whether multiple key-value pairs are allowed (defaults to TRUE)
+#' @param key The key to use (defaults to "suggest")
 #'
+#' @export
 mod_keyvalue_server <- function(id, submit = TRUE, multiple = TRUE, key = "suggest") {
     moduleServer(id, function(input, output, session) {
       ns <- session$ns

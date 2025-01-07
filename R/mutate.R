@@ -1,12 +1,13 @@
 #' Mutate block constructor
 #'
-#' This block allows to perform column subsetting on `data.frame` objects (see
-#' [dplyr::select()]).
+#' This block allows to add new variables and preserve existing ones
+#' (see [dplyr::mutate()]).
 #'
+#' @param strings Character vector of expressions
 #' @param ... Forwarded to [new_block()]
 #'
 #' @export
-new_mutate_block <- function(strings, ...) {
+new_mutate_block <- function(strings = character(), ...) {
 
   new_transform_block(
     function(data) {
