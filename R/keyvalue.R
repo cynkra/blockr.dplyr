@@ -89,7 +89,7 @@ mod_keyvalue_server <- function(id, submit = TRUE, multiple = TRUE, key = "sugge
           output$kv <- renderUI({
             message("renderUI")
             # isolate here is needed, despite bindEvent(), for some reason
-            keyvalue_ui(
+            mod_keyvalue_ui(
               value = isolate(r_value()),
               multiple = multiple,
               submit = submit,
@@ -201,8 +201,8 @@ shinyApp(
   ui = bslib::page_fluid(
     theme = bslib::bs_theme(version = 5),  # Activate Bootstrap 5
     mod_keyvalue_ui(
-      value = list(newcol = "x + 1", another_col = "mean(y)"),
-      multiple = TRUE,
+      value = list(newcol = "x + 1"),
+      multiple = FALSE,
       submit = TRUE,
       key = "suggest",
       ns = NS("kv")
@@ -211,10 +211,12 @@ shinyApp(
   server = function(input, output, session) {
     # riris <- reactive({ input$txt })
 
-    r_value_init <- reactive(c(newcol = "x + 1", another_col = "mean(y)"))
-
-    mod_keyvalue_server(
+    r_ans <- mod_keyvalue_server(
       "kv"
     )
+
+    observe({
+      print(r_ans())
+    })
   }
 )
