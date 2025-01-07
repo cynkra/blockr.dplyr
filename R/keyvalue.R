@@ -2,16 +2,15 @@
 #'
 #' Server module
 #'
-keyvalue_server <- function(x, ...) {
-  function(id, init = NULL, data = NULL) {
+mod_keyvalue_server <- function(id, submit = TRUE, multiple = TRUE, key = "suggest") {
     moduleServer(id, function(input, output, session) {
       ns <- session$ns
 
-      browser()
+      # submit <- isTRUE(x$submit)
+      # multiple <- isTRUE(x$multiple)
+      # key <- x$key
 
-      submit <- isTRUE(x$submit)
-      multiple <- isTRUE(x$multiple)
-      key <- x$key
+      r_value <- reactiveVal(c(newcol = ""))
 
       r_n_max <- reactiveVal(0L)
       # dynamically add aceAutocomplete, aceTooltip for each new row
@@ -44,7 +43,7 @@ keyvalue_server <- function(x, ...) {
         r_value_user(ans)
       })
 
-      r_value <- reactiveVal(if (is.null(init()$value)) c(newcol = "") else init()$value)
+
 
       # by user input
       observe({
@@ -55,6 +54,7 @@ keyvalue_server <- function(x, ...) {
 
       # by add button
       observe({
+        message("add")
         r_value(c(r_value(), newcol = ""))
       }) |>
         bindEvent(input$i_add)
@@ -81,13 +81,13 @@ keyvalue_server <- function(x, ...) {
 
       r_auto_complete_list <- reactive({
         user_cols <- names(r_value())
-        unique(c(colnames(data()), user_cols))
+        unique(c(user_cols))
       })
 
       observe({
         if (!identical(r_value(), r_value_user())) {
-          log_debug("redraw")
           output$kv <- renderUI({
+            message("renderUI")
             # isolate here is needed, despite bindEvent(), for some reason
             keyvalue_ui(
               value = isolate(r_value()),
@@ -115,9 +115,7 @@ keyvalue_server <- function(x, ...) {
 
       r_result
     })
-  }
 }
-
 
 get_input_names <- function(prefix, input, regex) {
   input_names <- grep(paste0("^", prefix), names(input), value = TRUE)
@@ -139,10 +137,7 @@ get_exprs <- function(prefix, input) {
 
 
 
-
-
-
-keyvalue_ui <- function(value,
+mod_keyvalue_ui <- function(value,
                         multiple,
                         submit,
                         key,
@@ -205,12 +200,21 @@ library(shinyAce)
 shinyApp(
   ui = bslib::page_fluid(
     theme = bslib::bs_theme(version = 5),  # Activate Bootstrap 5
-    keyvalue_ui(
+    mod_keyvalue_ui(
       value = list(newcol = "x + 1", another_col = "mean(y)"),
       multiple = TRUE,
       submit = TRUE,
-      key = "suggest"
+      key = "suggest",
+      ns = NS("kv")
     )
   ),
-  server = keyvalue_server
+  server = function(input, output, session) {
+    # riris <- reactive({ input$txt })
+
+    r_value_init <- reactive(c(newcol = "x + 1", another_col = "mean(y)"))
+
+    mod_keyvalue_server(
+      "kv"
+    )
+  }
 )
