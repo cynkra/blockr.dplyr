@@ -63,4 +63,4 @@ new_mutate_block <- function(columns = character(), ...) {
     ...
   )
 }
-# serve(new_mutate_block())
+# serve(new_mutate_block(), list(data = mtcars))
