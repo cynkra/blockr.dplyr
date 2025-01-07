@@ -36,19 +36,16 @@ new_arrange_block <- function(columns = character(), desc = "False", ...) {
 
           list(
             expr = reactive(
-              if (input$desc == "True") {
-                bquote(
-                  dplyr::arrange(data, dplyr::desc(..(vars))),
-                  list(vars = lapply(sels(), as.name)),
-                  splice = TRUE
-                )
-              } else {
-                bquote(
-                  dplyr::arrange(data, ..(vars)),
-                  list(vars = lapply(sels(), as.name)),
-                  splice = TRUE
-                )
-              }
+              parse(text = glue::glue(
+                "dplyr::arrange(
+                  data,
+                  {if (input$desc == 'True')
+                    glue::glue('dplyr::desc({glue::glue_collapse(sels(), sep = ', ')})')
+                   else
+                    glue::glue_collapse(sels(), sep = ', ')
+                  }
+                )"
+              ))[1]
             ),
             state = list(
               columns = reactive(sels()),
