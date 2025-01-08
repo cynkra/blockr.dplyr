@@ -7,7 +7,7 @@
 #' @param ... Forwarded to [new_block()]
 #'
 #' @export
-new_mutate_block <- function(strings = character(), ...) {
+new_mutate_block <- function(r_strings, ...) {
 
   new_transform_block(
     function(data) {
@@ -15,22 +15,22 @@ new_mutate_block <- function(strings = character(), ...) {
         "expression",
         function(input, output, session) {
 
-          r_strings <-  mod_keyvalue_server(id = "kv")
-
           r_choices <- reactive({
             colnames(data())
           })
 
-
-
-
+          r_ans <-  mod_keyvalue_server(
+            id = "kv",
+            get_value = \() c(newcol = 'paste("my", "expression")'),
+            get_cols = \() colnames(data())
+          )
 
           r_expr <- reactive({
-            strings <- r_strings()
+            strings <- r_ans()
             req(strings)
             stopifnot(is.character(strings), !is.null(names(strings)))
 
-            mutate_string <- glue::glue("{names(strings)} = {unname(r_strings())}")
+            mutate_string <- glue::glue("{names(strings)} = {unname(strings)}")
 
             expr <- parse(text = glue::glue(
               "dplyr::mutate(
@@ -56,9 +56,8 @@ new_mutate_block <- function(strings = character(), ...) {
           list(
             expr = r_expr,
             state = list(
-              strings = r_strings,
+              strings = r_ans,
               choices = r_choices
-              # choices = r_choices
             )
           )
         }

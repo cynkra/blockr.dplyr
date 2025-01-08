@@ -6,15 +6,47 @@
 #' @param key The key to use (defaults to "suggest")
 #'
 #' @export
-mod_keyvalue_server <- function(id, submit = TRUE, multiple = TRUE, key = "suggest") {
+mod_keyvalue_server <- function(id, get_value, get_cols, submit = TRUE, multiple = TRUE, key = "suggest") {
     moduleServer(id, function(input, output, session) {
       ns <- session$ns
 
-      # submit <- isTRUE(x$submit)
-      # multiple <- isTRUE(x$multiple)
-      # key <- x$key
+      r_value <- reactiveVal({
+        print(get_value())
+        get_value()
+      })
 
-      r_value <- reactiveVal(c(newcol = ""))
+      r_auto_complete_list <- reactive({
+        print(get_cols())
+        get_cols()
+      })
+
+
+      observe({
+        if (!isTruthy(r_value_user())) {  # only update if not from user input
+          shinyAce::updateAceEditor(
+            session,
+            editorId = paste0("pl_", 1, "_val"),
+            autoCompleteList = list(data = r_auto_complete_list())
+          )
+        }
+      })
+
+      observe({
+        val <- r_value()
+        if (!isTruthy(r_value_user())) {  # only update if not from user input
+          shinyAce::updateAceEditor(
+            session,
+            editorId = paste0("pl_", 1, "_val"),
+            value = unname(val)
+          )
+          shinyAce::updateAceEditor(
+            session,
+            editorId = paste0("pl_", 1, "_name"),
+            value = names(val)
+          )
+        }
+      })
+
 
       r_n_max <- reactiveVal(0L)
       # dynamically add aceAutocomplete, aceTooltip for each new row
@@ -44,67 +76,22 @@ mod_keyvalue_server <- function(id, submit = TRUE, multiple = TRUE, key = "sugge
             ans <- ans[idx]
           }
         }
-        r_value_user(ans)
+
+        # Always update with current user input, even if empty
+        if (length(ans) > 0) {
+          r_value_user(ans)
+        }
       })
-
-
 
       # by user input
       observe({
-        req(r_value_user())
-        r_value(r_value_user())
+        ans <- r_value_user()
+        if (!is.null(ans)) {
+          r_value(ans)
+        }
       }) |>
         bindEvent(r_value_user(), ignoreInit = TRUE)
 
-      # by add button
-      observe({
-        message("add")
-        r_value(c(r_value(), newcol = ""))
-      }) |>
-        bindEvent(input$i_add)
-
-      # by remove button
-      r_to_be_removed <- reactive({
-        rms <- get_rms("pl_", input)
-        to_be_rm <- names(rms[rms > 0])
-        if (identical(length(to_be_rm), 0L)) {
-          return()
-        }
-        ans <- as.integer(gsub("_rm$", "", gsub("^pl_", "", to_be_rm)))
-        ans
-      })
-      observe({
-        req(r_to_be_removed())
-        # keep one expression
-        if (length(r_value()) <= 1) {
-          return()
-        }
-        r_value(r_value()[-r_to_be_removed()])
-      }) |>
-        bindEvent(r_to_be_removed())
-
-      r_auto_complete_list <- reactive({
-        user_cols <- names(r_value())
-        unique(c(user_cols))
-      })
-
-      observe({
-        if (!identical(r_value(), r_value_user())) {
-          output$kv <- renderUI({
-            message("renderUI")
-            # isolate here is needed, despite bindEvent(), for some reason
-            mod_keyvalue_ui(
-              value = isolate(r_value()),
-              multiple = multiple,
-              submit = submit,
-              key = key,
-              auto_complete_list = list(column = isolate(r_auto_complete_list())),
-              ns = ns
-            )
-          })
-        }
-      }) |>
-        bindEvent(r_value())
 
       if (submit) {
         r_result <- reactive({
