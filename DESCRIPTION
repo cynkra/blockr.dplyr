@@ -24,8 +24,11 @@ RoxygenNote: 7.3.1
 Imports:
     shiny,
     blockr.core (>= 0.0.1),
-    dplyr
+    dplyr,
+    flexfilter
 Suggests: 
     testthat (>= 3.0.0)
-Remotes: cynkra/blockr.core
+Remotes: 
+    cynkra/blockr.core,
+    the-y-company/flexfilter
 Config/testthat/edition: 3
