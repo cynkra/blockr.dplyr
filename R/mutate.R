@@ -3,7 +3,8 @@
 #' This block allows to add new variables and preserve existing ones
 #' (see [dplyr::mutate()]).
 #'
-#' @param r_strings Reactive expression returning character vector of expressions
+#' @param r_strings Reactive expression returning character vector of
+#'   expressions
 #' @param ... Additional arguments forwarded to [new_block()]
 #'
 #' @return A block object for mutate operations

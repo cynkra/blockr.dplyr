@@ -22,7 +22,8 @@ mod_keyvalue_server(
 
 \item{submit}{Whether to show a submit button (defaults to TRUE)}
 
-\item{multiple}{Whether multiple key-value pairs are allowed (defaults to TRUE)}
+\item{multiple}{Whether multiple key-value pairs are allowed
+(defaults to TRUE)}
 
 \item{key}{The key display mode: "suggest", "empty", or "none"}
 }
@@ -32,4 +33,12 @@ A reactive expression containing the current key-value pairs
 \description{
 A Shiny module that manages key-value pairs for mutate expressions.
 Handles user input, autocompletion, and value updates.
+}
+\examples{
+\dontrun{
+serve(new_mutate_block(), list(data = mtcars))
+}
+}
+\seealso{
+\code{\link[=new_transform_block]{new_transform_block()}}
 }

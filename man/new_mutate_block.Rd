@@ -7,7 +7,8 @@
 new_mutate_block(r_strings, ...)
 }
 \arguments{
-\item{r_strings}{Reactive expression returning character vector of expressions}
+\item{r_strings}{Reactive expression returning character vector of
+expressions}
 
 \item{...}{Additional arguments forwarded to \code{\link[=new_block]{new_block()}}}
 }

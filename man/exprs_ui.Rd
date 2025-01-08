@@ -24,14 +24,17 @@ exprs_ui(
 
 \item{key}{How to display the 'key' field: "suggest", "empty", or "none"}
 
-\item{auto_complete_list}{List of autocompletion options, passed to shinyAce::aceEditor()}
+\item{auto_complete_list}{List of autocompletion options, passed to
+shinyAce::aceEditor()}
 }
 \value{
 A \code{div} element containing the UI components
 }
 \description{
-This function generates a UI element for inputting expressions in a Shiny application.
-It includes two \code{shinyAce::aceEditor} elements for inputting the name and value of a new column.
+This function generates a UI element for inputting expressions in a Shiny
+application.
+It includes two \code{shinyAce::aceEditor} elements for inputting the name and
+value of a new column.
 }
 \examples{
 \dontrun{

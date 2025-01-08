@@ -7,114 +7,119 @@
 #' @param get_value Function that returns initial values
 #' @param get_cols Function that returns column names for autocompletion
 #' @param submit Whether to show a submit button (defaults to TRUE)
-#' @param multiple Whether multiple key-value pairs are allowed (defaults to TRUE)
+#' @param multiple Whether multiple key-value pairs are allowed
+#'   (defaults to TRUE)
 #' @param key The key display mode: "suggest", "empty", or "none"
 #'
 #' @return A reactive expression containing the current key-value pairs
+#' @importFrom shiny req showNotification NS moduleServer reactive
+#' @importFrom glue glue
+#' @seealso [new_transform_block()]
+#' @examples
+#' \dontrun{
+#' serve(new_mutate_block(), list(data = mtcars))
+#' }
 #' @export
-mod_keyvalue_server <- function(id,
-                                get_value,
-                                get_cols,
-                                submit = TRUE,
-                                multiple = TRUE,
-                                key = "suggest") {
-    moduleServer(id, function(input, output, session) {
-      ns <- session$ns
+mod_keyvalue_server <- function(
+  id,
+  get_value,
+  get_cols,
+  submit = TRUE,
+  multiple = TRUE,
+  key = "suggest"
+) {
+  moduleServer(id, function(input, output, session) {
+    ns <- session$ns
 
-      r_value <- reactiveVal({
-        print(get_value())
-        get_value()
-      })
+    # Initialize reactive values
+    r_value <- reactiveVal({
+      print(get_value())
+      get_value()
+    })
 
-      r_auto_complete_list <- reactive({
-        print(get_cols())
-        get_cols()
-      })
+    r_auto_complete_list <- reactive({
+      print(get_cols())
+      get_cols()
+    })
 
+    # Update autocomplete list when columns change
+    observe({
+      if (!isTruthy(r_value_user())) {
+        shinyAce::updateAceEditor(
+          session,
+          editorId = paste0("pl_", 1, "_val"),
+          autoCompleteList = list(data = r_auto_complete_list())
+        )
+      }
+    })
 
-      observe({
-        if (!isTruthy(r_value_user())) {  # only update if not from user input
-          shinyAce::updateAceEditor(
-            session,
-            editorId = paste0("pl_", 1, "_val"),
-            autoCompleteList = list(data = r_auto_complete_list())
-          )
+    # Update editor values for non-user changes
+    observe({
+      val <- r_value()
+      if (!isTruthy(r_value_user())) {
+        shinyAce::updateAceEditor(
+          session,
+          editorId = paste0("pl_", 1, "_val"),
+          value = unname(val)
+        )
+        shinyAce::updateAceEditor(
+          session,
+          editorId = paste0("pl_", 1, "_name"),
+          value = names(val)
+        )
+      }
+    })
+
+    r_n_max <- reactiveVal(0L)
+    # Dynamically add aceAutocomplete and aceTooltip for new rows
+    observe({
+      n <- length(r_value())
+      if (n > r_n_max()) {
+        add <- (r_n_max() + 1):n
+        for (i in add) {
+          aceAutocomplete(paste0("pl_", i, "_val"))
+          aceTooltip(paste0("pl_", i, "_val"))
         }
-      })
+        r_n_max(n)
+      }
+    }) |>
+      bindEvent(r_value())
 
-      observe({
-        val <- r_value()
-        if (!isTruthy(r_value_user())) {  # only update if not from user input
-          shinyAce::updateAceEditor(
-            session,
-            editorId = paste0("pl_", 1, "_val"),
-            value = unname(val)
-          )
-          shinyAce::updateAceEditor(
-            session,
-            editorId = paste0("pl_", 1, "_name"),
-            value = names(val)
-          )
+    # Handle user input and DOM cleanup
+    r_value_user <- reactiveVal(NULL)
+    observe({
+      ans <- get_exprs("pl_", input)
+      value <- isolate(r_value())
+
+      # Clean up previously used ids not removed from DOM
+      if (length(ans) > length(value)) {
+        idx <- seq_along(value)
+        if (length(idx) > 0) {
+          ans <- ans[idx]
         }
-      })
-
-      r_n_max <- reactiveVal(0L)
-      # dynamically add aceAutocomplete, aceTooltip for each new row
-      observe({
-        n <- length(r_value())
-        if (n > r_n_max()) {
-          add <- (r_n_max() + 1):n
-          for (i in add) {
-            aceAutocomplete(paste0("pl_", i, "_val"))
-            aceTooltip(paste0("pl_", i, "_val"))
-          }
-          r_n_max(n)
-        }
-      }) |>
-        bindEvent(r_value())
-
-      # using reactiveVal(), instead of reactive, reduces the number of updates
-      r_value_user <- reactiveVal(NULL)
-      observe({
-        ans <- get_exprs("pl_", input)
-        value <- isolate(r_value())
-
-        # previously used ids are not removed from dom
-        if (length(ans) > length(value)) {
-          idx <- seq_along(value)
-          if (length(idx) > 0) {
-            ans <- ans[idx]
-          }
-        }
-
-        if (length(ans) > 0) {
-          r_value_user(ans)
-        }
-      })
-
-      # by user input
-      observe({
-        ans <- r_value_user()
-        if (!is.null(ans)) {
-          r_value(ans)
-        }
-      }) |>
-        bindEvent(r_value_user(), ignoreInit = TRUE)
-
-
-      if (submit) {
-        r_result <- reactive({
-          r_value()
-        }) |>
-          bindEvent(input$i_submit)
-      } else {
-        r_result <- reactive({
-          r_value()
-        })
       }
 
-      r_result
+      if (length(ans) > 0) {
+        r_value_user(ans)
+      }
     })
+
+    # Update main value from user input
+    observe({
+      ans <- r_value_user()
+      if (!is.null(ans)) {
+        r_value(ans)
+      }
+    }) |>
+      bindEvent(r_value_user(), ignoreInit = TRUE)
+
+    # Return value based on submit mode
+    if (submit) {
+      reactive(r_value()) |> bindEvent(input$i_submit)
+    } else {
+      reactive(r_value())
+    }
+  })
 }
 
 #' Helper function to get input names matching a pattern

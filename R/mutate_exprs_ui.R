@@ -1,14 +1,17 @@
 #' Create a UI element for expressions
 #'
-#' This function generates a UI element for inputting expressions in a Shiny application.
-#' It includes two `shinyAce::aceEditor` elements for inputting the name and value of a new column.
+#' This function generates a UI element for inputting expressions in a Shiny
+#' application.
+#' It includes two `shinyAce::aceEditor` elements for inputting the name and
+#' value of a new column.
 #'
 #' @param id Character string, an identifier for the UI element
 #' @param value_name Default name for the new column
 #' @param value_val Default value for the new column
 #' @param delete_button Should a delete button be shown?
 #' @param key How to display the 'key' field: "suggest", "empty", or "none"
-#' @param auto_complete_list List of autocompletion options, passed to shinyAce::aceEditor()
+#' @param auto_complete_list List of autocompletion options, passed to
+#'   shinyAce::aceEditor()
 #' @return A `div` element containing the UI components
 #' @importFrom shinyAce aceEditor aceAutocomplete aceTooltip
 #' @importFrom shiny icon div
@@ -72,8 +75,7 @@ exprs_ui <- function(id = "",
           class = "mutate-column",
           shinyAce::aceEditor(
             outputId = paste0(id, "_name"),
-            # default value of 1000 may result in no update when clicking 'submit'
-            # too fast.
+            # Update may be delayed when clicking submit
             debounce = 300,
             value = value_name,
             mode = "r",
