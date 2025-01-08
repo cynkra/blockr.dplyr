@@ -1,12 +1,23 @@
-#' Key-value server module
+#' Mutate key-value server module
+#'
+#' A Shiny module that manages key-value pairs for mutate expressions.
+#' Handles user input, autocompletion, and value updates.
 #'
 #' @param id The module ID
+#' @param get_value Function that returns initial values
+#' @param get_cols Function that returns column names for autocompletion
 #' @param submit Whether to show a submit button (defaults to TRUE)
 #' @param multiple Whether multiple key-value pairs are allowed (defaults to TRUE)
-#' @param key The key to use (defaults to "suggest")
+#' @param key The key display mode: "suggest", "empty", or "none"
 #'
+#' @return A reactive expression containing the current key-value pairs
 #' @export
-mod_keyvalue_server <- function(id, get_value, get_cols, submit = TRUE, multiple = TRUE, key = "suggest") {
+mod_keyvalue_server <- function(id,
+                                get_value,
+                                get_cols,
+                                submit = TRUE,
+                                multiple = TRUE,
+                                key = "suggest") {
     moduleServer(id, function(input, output, session) {
       ns <- session$ns
 
@@ -47,7 +58,6 @@ mod_keyvalue_server <- function(id, get_value, get_cols, submit = TRUE, multiple
         }
       })
 
-
       r_n_max <- reactiveVal(0L)
       # dynamically add aceAutocomplete, aceTooltip for each new row
       observe({
@@ -77,7 +87,6 @@ mod_keyvalue_server <- function(id, get_value, get_cols, submit = TRUE, multiple
           }
         }
 
-        # Always update with current user input, even if empty
         if (length(ans) > 0) {
           r_value_user(ans)
         }
@@ -108,32 +117,56 @@ mod_keyvalue_server <- function(id, get_value, get_cols, submit = TRUE, multiple
     })
 }
 
+#' Helper function to get input names matching a pattern
+#'
+#' @param prefix Prefix to match at start of input names
+#' @param input Shiny input object
+#' @param regex Regular expression to match in input names
+#' @return Character vector of matching input names
 get_input_names <- function(prefix, input, regex) {
   input_names <- grep(paste0("^", prefix), names(input), value = TRUE)
   grep(regex, input_names, value = TRUE)
 }
 
+#' Get remove button values
+#'
+#' @param prefix Prefix to match at start of input names
+#' @param input Shiny input object
+#' @return Named integer vector of remove button values
 get_rms <- function(prefix, input) {
   input_names <- get_input_names(prefix, input, "_rm$")
   vapply(setNames(input_names, input_names), \(x) input[[x]], 0L)
 }
 
+#' Extract expressions from input values
+#'
+#' @param prefix Prefix to match at start of input names
+#' @param input Shiny input object
+#' @return Named character vector of expressions
 get_exprs <- function(prefix, input) {
   input_names <- get_input_names(prefix, input, "_name$|_val$")
   ans <- lapply(setNames(input_names, input_names), \(x) input[[x]])
   vals <- unlist(ans[grepl("_val$", names(ans))])
   names <- unlist(ans[grepl("_name$", names(ans))])
-  setNames(vals, names) # a named character vector
+  setNames(vals, names)
 }
 
-
-
+#' Create key-value UI module
+#'
+#' @param value Initial values
+#' @param multiple Whether multiple key-value pairs are allowed
+#' @param submit Whether to show submit button
+#' @param key Key display mode
+#' @param auto_complete_list List of autocomplete options
+#' @param ns Namespace function
+#' @return A div containing the UI elements
+#' @export
 mod_keyvalue_ui <- function(value,
-                        multiple,
-                        submit,
-                        key,
-                        auto_complete_list = NULL,
-                        ns = function(x) x) {
+                            multiple,
+                            submit,
+                            key,
+                            auto_complete_list = NULL,
+                            ns = function(x) x) {
   names <- names(value)
   values <- unname(value)
   ids <- ns(paste0("pl_", seq(value)))
@@ -184,30 +217,38 @@ mod_keyvalue_ui <- function(value,
   )
 }
 
+#' Run example app demonstrating key-value functionality
+#'
+#' This function launches a Shiny app that demonstrates the key-value module
+#' functionality with a simple example.
+#'
+#' @examples
+#' \dontrun{
+#' run_keyvalue_example()
+#' }
+#' @export
+run_keyvalue_example <- function() {
+  shinyApp(
+    ui = bslib::page_fluid(
+      theme = bslib::bs_theme(version = 5),
+      mod_keyvalue_ui(
+        value = list(newcol = "x + 1"),
+        multiple = FALSE,
+        submit = TRUE,
+        key = "suggest",
+        ns = NS("kv")
+      )
+    ),
+    server = function(input, output, session) {
+      r_ans <- mod_keyvalue_server(
+        "kv",
+        get_value = function() list(newcol = "x + 1"),
+        get_cols = function() c("x", "y", "z")
+      )
 
-
-# library(shiny)
-# library(shinyAce)
-shinyApp(
-  ui = bslib::page_fluid(
-    theme = bslib::bs_theme(version = 5),  # Activate Bootstrap 5
-    mod_keyvalue_ui(
-      value = list(newcol = "x + 1"),
-      multiple = FALSE,
-      submit = TRUE,
-      key = "suggest",
-      ns = NS("kv")
-    )
-  ),
-  server = function(input, output, session) {
-    # riris <- reactive({ input$txt })
-
-    r_ans <- mod_keyvalue_server(
-      "kv"
-    )
-
-    observe({
-      print(r_ans())
-    })
-  }
-)
+      observe({
+        print(r_ans())
+      })
+    }
+  )
+}
