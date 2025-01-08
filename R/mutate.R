@@ -17,10 +17,13 @@ new_mutate_block <- function(strings = character(), ...) {
 
           r_strings <-  mod_keyvalue_server(id = "kv")
 
-          observe({
-            message("hely")
-            print(r_strings())
+          r_choices <- reactive({
+            colnames(data())
           })
+
+
+
+
 
           r_expr <- reactive({
             strings <- r_strings()
@@ -53,18 +56,21 @@ new_mutate_block <- function(strings = character(), ...) {
           list(
             expr = r_expr,
             state = list(
-              strings = r_strings
+              strings = r_strings,
+              choices = r_choices
+              # choices = r_choices
             )
           )
         }
       )
     },
-    function(ns, strings = list(newcol = "x + 1")) {
+    function(ns, strings = list(newcol = "1"), choices = character()) {
       mod_keyvalue_ui(
         value = strings,
         multiple = FALSE,
         submit = TRUE,
         key = "suggest",
+        auto_complete_list = list(data = choices),
         ns = NS(ns("expression", "kv"))
       )
     },
