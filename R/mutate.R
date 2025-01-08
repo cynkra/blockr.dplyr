@@ -3,23 +3,22 @@
 #' This block allows to add new variables and preserve existing ones
 #' (see [dplyr::mutate()]).
 #'
-#' @param strings Character vector of expressions
-#' @param ... Forwarded to [new_block()]
+#' @param r_strings Reactive expression returning character vector of expressions
+#' @param ... Additional arguments forwarded to [new_block()]
 #'
+#' @return A block object for mutate operations
 #' @export
 new_mutate_block <- function(r_strings, ...) {
-
   new_transform_block(
     function(data) {
       moduleServer(
         "expression",
         function(input, output, session) {
-
           r_choices <- reactive({
             colnames(data())
           })
 
-          r_ans <-  mod_keyvalue_server(
+          r_ans <- mod_keyvalue_server(
             id = "kv",
             get_value = \() c(newcol = 'paste("my", "expression")'),
             get_cols = \() colnames(data())

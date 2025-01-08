@@ -3,14 +3,16 @@
 #' This function generates a UI element for inputting expressions in a Shiny application.
 #' It includes two `shinyAce::aceEditor` elements for inputting the name and value of a new column.
 #'
-#' @param id Character string, an identifier for the UI element.
-#' @param value_name Default name for the new column.
-#' @param value_val Default value for the new column.
+#' @param id Character string, an identifier for the UI element
+#' @param value_name Default name for the new column
+#' @param value_val Default value for the new column
 #' @param delete_button Should a delete button be shown?
-#' @param key How to display the 'key' field
-#' @param auto_complete_list auto_complete_list, passed to shinyAce::aceEditor()
-#' @return A `div` element containing the UI components.
+#' @param key How to display the 'key' field: "suggest", "empty", or "none"
+#' @param auto_complete_list List of autocompletion options, passed to shinyAce::aceEditor()
+#' @return A `div` element containing the UI components
 #' @importFrom shinyAce aceEditor aceAutocomplete aceTooltip
+#' @importFrom shiny icon div
+#' @importFrom htmltools tagList tags
 #' @export
 #' @examples
 #' \dontrun{
@@ -19,11 +21,16 @@
 #' library(bslib)
 #' shinyApp(
 #'   ui = bslib::page_fluid(
-#'     theme = bslib::bs_theme(version = 5),  # Activate Bootstrap 5
-#'     exprs_ui(id = "myid", value_name = "bla", value_val = "blabla", delete_button = TRUE)
+#'     theme = bslib::bs_theme(version = 5),
+#'     exprs_ui(
+#'       id = "myid",
+#'       value_name = "newcol",
+#'       value_val = "x + 1",
+#'       delete_button = TRUE
+#'     )
 #'   ),
 #'   server = function(input, output, session) {
-#'     shinyAce::aceAutocomplete("myid_val")   # Need to call this to get the autocomplete list
+#'     shinyAce::aceAutocomplete("myid_val")
 #'   }
 #' )
 #' }
