@@ -16,7 +16,7 @@ new_filter_block <- function(...) {
           # Initialize flexfilter
           values <- flexfilter::flexfilter_server(
             "filter",
-            data
+            data()
           )
           
           list(
@@ -36,17 +36,13 @@ new_filter_block <- function(...) {
               exprs = reactive({
                 req(values())
                 values()$exprs
-              }),
-              cols_opts = reactive({
-                req(data())
-                colnames(data())
               })
             )
           )
         }
       )
     },
-    function(ns, cols_opts = character()) {
+    function(ns, exprs = character()) {
       flexfilter::flexfilterUI(ns("expression", "filter"))
     },
     class = "filter_block",
