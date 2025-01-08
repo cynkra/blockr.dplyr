@@ -7,6 +7,13 @@
 #' @param ... Additional arguments forwarded to [new_block()]
 #'
 #' @return A block object for mutate operations
+#' @importFrom shiny req showNotification NS moduleServer reactive
+#' @importFrom glue glue
+#' @seealso [new_transform_block()]
+#' @examples
+#' \dontrun{
+#' serve(new_mutate_block(), list(data = mtcars))
+#' }
 #' @export
 new_mutate_block <- function(r_strings, ...) {
   new_transform_block(
