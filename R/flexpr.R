@@ -217,18 +217,13 @@ run_flexpr_example <- function() {
           cols = colnames(iris),
           ns = NS("flexpr")
         ),
-        div(
-          class = "mt-3",
-          h4("Current value:"),
-          verbatimTextOutput("value")
-        )
+        verbatimTextOutput("value")
       )
     ),
     server = function(input, output, session) {
       r_ans <- mod_flexpr_server(
         "flexpr",
         get_value = function() "paste(Sepal.Length, Sepal.Width)",
-        # get_value = function() "Sepal.Length, Sepal.Width",
         get_cols = function() colnames(iris)
       )
 
