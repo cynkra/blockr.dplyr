@@ -23,7 +23,8 @@ exprs_ui_minimal <- function(
   tagList(
     tags$style(".mutate-expression .shiny-ace {
       border: none;
-      margin: 0.5rem;
+      margin: 7px;
+      margin-bottom: 7.5px;   // to align with select box
     }
 
     .mutate-expression .mutate-code {
@@ -31,7 +32,7 @@ exprs_ui_minimal <- function(
     }"),
     div(
       class = paste(
-        "input-group d-flex justify-content-between mt-1 mb-3",
+        "input-group mb-3",
         "mutate-expression border border-dark-subtle rounded"
       ),
       div(
