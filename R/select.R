@@ -38,19 +38,17 @@ new_select_block <- function(columns = character(), ...) {
               )
             ),
             state = list(
-              columns = reactive(sels()),
-              choices = reactive(cols())
+              columns = reactive(sels())
             )
           )
         }
       )
     },
-    function(ns, columns, choices = character()) {
+    function(ns) {
       selectInput(
         inputId = ns("expression", "columns"),
         label = "Columns",
-        choices = choices,
-        selected = columns,
+        choices = list(),
         multiple = TRUE
       )
     },
