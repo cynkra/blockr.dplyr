@@ -54,13 +54,20 @@ mod_flexpr_server <- function(
     ns <- session$ns
 
     # Initialize reactive values
-    initial_value <- get_value()
-    r_value <- reactiveVal(initial_value)
-    r_cols <- reactive(get_cols())
+    r_value <- reactiveVal()
+    observe({
+      r_value(get_value())
+    })
+
+    observe({
+      print(get_cols())
+    })
 
     # Set initial mode based on value format
-    initial_mode <- !is.null(expr_to_cols(initial_value, get_cols()))
-    updateCheckboxInput(session, "use_expr", value = !initial_mode)
+    observe({
+      initial_mode <- !is.null(expr_to_cols(get_value(), get_cols()))
+      updateCheckboxInput(session, "use_expr", value = !initial_mode)
+    })
 
     # Update expression input when switching to expression mode
     observeEvent(input$use_expr, {
@@ -76,12 +83,12 @@ mod_flexpr_server <- function(
     # Update select input when switching to select mode
     observeEvent(input$use_expr, {
       if (!isTruthy(input$use_expr)) {
-        selected <- expr_to_cols(r_value(), r_cols())
+        selected <- expr_to_cols(r_value(), get_cols())
         if (!is.null(selected)) {
           updateSelectInput(
             session,
             "selected_cols",
-            choices = r_cols(),
+            choices = get_cols(),
             selected = selected
           )
         }
@@ -156,10 +163,7 @@ mod_flexpr_ui <- function(
           conditionalPanel(
             condition = sprintf("input['%s'] == true", ns("use_expr")),
             exprs_ui_minimal(
-              id = ns("expr"),
-              value = value,
-              key = "none",
-              auto_complete_list = list(columns = cols)
+              id = ns("expr")
             )
           )
         ),
