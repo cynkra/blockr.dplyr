@@ -44,23 +44,42 @@ mod_flexpr_server <- function(
 #' @param auto_complete_list List of autocomplete options
 #' @param ns Namespace function
 #' @return A div containing the UI elements
-#' @importFrom shiny NS actionButton icon div
+#' @importFrom shiny NS actionButton icon div selectInput
+#' @importFrom shinyWidgets materialSwitch
 #' @importFrom htmltools tagList
 #' @export
 mod_flexpr_ui <- function(
   value,
+  cols = c("Sepal.Length", "Sepal.Width"),
   submit = TRUE,
-  auto_complete_list = NULL,
   ns = function(x) x
 ) {
   div(
     div(
-      id = ns("exprs"),
-      exprs_ui_minimal(
-        id = ns("expr"),
-        value = value,
-        key = "none",
-        auto_complete_list = auto_complete_list
+      class = "mb-3",
+      materialSwitch(
+        ns("use_expr"),
+        "Use expression editor",
+        value = FALSE
+      ),
+      conditionalPanel(
+        condition = sprintf("input['%s'] == false", ns("use_expr")),
+        selectInput(
+          ns("selected_cols"),
+          NULL,
+          choices = cols,
+          multiple = TRUE,
+          selected = cols[1]
+        )
+      ),
+      conditionalPanel(
+        condition = sprintf("input['%s'] == true", ns("use_expr")),
+        exprs_ui_minimal(
+          id = ns("expr"),
+          value = value,
+          key = "none",
+          auto_complete_list = cols
+        )
       )
     ),
     div(

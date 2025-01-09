@@ -28,7 +28,8 @@ Imports:
     shinyAce,
     glue,
     htmltools,
-    bslib
+    bslib,
+    shinyWidgets
 Suggests:
     testthat (>= 3.0.0)
 Remotes: cynkra/blockr.core
