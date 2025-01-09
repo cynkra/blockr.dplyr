@@ -55,8 +55,13 @@ mod_flexpr_ui <- function(
 ) {
   div(
     div(
-
-
+      id = ns("exprs"),
+      exprs_ui_minimal(
+        id = ns("expr"),
+        value = value,
+        key = "none",
+        auto_complete_list = auto_complete_list
+      )
     ),
     div(
       class = "w-100 d-flex justify-content-end",
