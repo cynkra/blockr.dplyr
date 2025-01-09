@@ -45,7 +45,6 @@ new_summarize_block <- function(group_cols = character(),
   # Create named vectors for expressions and labels
   stat_exprs <- sapply(stat_info, `[[`, "expr")
   stat_labels <- sapply(stat_info, `[[`, "label")
-  names(stat_labels) <- names(stat_info)  # Ensure names are preserved
   
   new_transform_block(
     function(data) {
@@ -77,23 +76,18 @@ new_summarize_block <- function(group_cols = character(),
             # Remove any newly grouped columns from summary selections
             current_summaries <- summary_sels()
             summary_sels(setdiff(current_summaries, new_groups))
-          }, ignoreInit = TRUE)
+          })
           
-          # Update summary columns
+          # Update summary columns and stats
           observeEvent(input$summary_cols, {
             summary_sels(input$summary_cols)
-          }, ignoreInit = TRUE)
+          })
           
-          # Create a named vector for the checkbox choices
-          stat_choices <- setNames(names(stat_labels), stat_labels)
-          
-          # Update stats - use the names directly
           observeEvent(input$stats, {
-            selected_stats <- stat_choices[input$stats]
-            stat_sels(selected_stats)
+            stat_sels(names(stat_labels)[match(input$stats, stat_labels)])
           }, ignoreInit = TRUE)
           
-          # Initialize UI once at startup
+          # Keep UI in sync
           observe({
             updateSelectInput(
               session,
@@ -107,6 +101,10 @@ new_summarize_block <- function(group_cols = character(),
               choices = available_summary_cols(),
               selected = intersect(summary_sels(), available_summary_cols())
             )
+          })
+          
+          # Separate observer for stats to avoid circular updates
+          observe({
             updateCheckboxGroupInput(
               session,
               inputId = "stats",
