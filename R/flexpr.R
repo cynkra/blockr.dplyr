@@ -65,7 +65,6 @@ mod_flexpr_server <- function(
     # Update expression input when switching to expression mode
     observeEvent(input$use_expr, {
       if (isTruthy(input$use_expr)) {
-        message("Update expression input when switching to expression mode")
         shinyAce::updateAceEditor(
           session,
           "expr",
@@ -77,7 +76,6 @@ mod_flexpr_server <- function(
     # Update select input when switching to select mode
     observeEvent(input$use_expr, {
       if (!isTruthy(input$use_expr)) {
-        message("Update select input when switching to select mode")
         selected <- expr_to_cols(r_value(), r_cols())
         if (!is.null(selected)) {
           updateSelectInput(
@@ -103,13 +101,8 @@ mod_flexpr_server <- function(
       }
     })
 
-    observe({
-      print(r_current())
-    })
-
     # Update value when mode changes
     observeEvent(r_current(), {
-      print("Update value when mode changes")
       r_value(r_current())
     }, ignoreInit = TRUE)
 

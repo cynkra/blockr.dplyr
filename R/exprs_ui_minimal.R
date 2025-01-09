@@ -38,7 +38,7 @@ exprs_ui_minimal <- function(
       div(
         class = "mutate-code",
         shinyAce::aceEditor(
-          outputId = paste0(id, "_val"),
+          outputId = id,
           value = value,
           mode = "r",
           autoComplete = "live",
