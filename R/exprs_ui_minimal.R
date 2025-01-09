@@ -10,7 +10,7 @@
 #' @importFrom htmltools tagList tags
 #' @examples
 #' \dontrun{
-#' run_minimal_example()
+#' pkgload::load_all(); run_minimal_example()
 #' }
 exprs_ui_minimal <- function(
   id = "",
@@ -23,14 +23,17 @@ exprs_ui_minimal <- function(
   tagList(
     tags$style(".mutate-expression .shiny-ace {
       border: none;
-      margin: 1rem;
+      margin: 0.5rem;
     }
 
     .mutate-expression .mutate-code {
-      width: 62%;
+      width: 100%;
     }"),
     div(
-      class = "input-group d-flex justify-content-between mt-1 mb-3 mutate-expression",
+      class = paste(
+        "input-group d-flex justify-content-between mt-1 mb-3",
+        "mutate-expression border border-dark-subtle rounded"
+      ),
       div(
         class = "mutate-code",
         shinyAce::aceEditor(
@@ -68,22 +71,6 @@ run_minimal_example <- function() {
   shinyApp(
     ui = bslib::page_fluid(
       theme = bslib::bs_theme(version = 5),
-      # Add CSS for consistent styling
-      tags$head(
-        tags$style("
-          .exprs-container {
-            position: relative;
-          }
-          .exprs-editor {
-            width: 100%;
-            border: 1px solid #ced4da;
-            border-radius: 0.25rem;
-          }
-          .ace_editor {
-            font-size: 1rem !important;
-          }
-        ")
-      ),
       div(
         class = "container mt-3",
         exprs_ui_minimal(
