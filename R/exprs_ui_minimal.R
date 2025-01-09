@@ -2,7 +2,6 @@
 #'
 #' @param id Character string, an identifier for the UI element
 #' @param value Default value for the expression
-#' @param key How to display the 'key' field: "suggest", "empty", or "none"
 #' @param auto_complete_list List of autocompletion options
 #' @return A div element containing the UI components
 #' @importFrom shinyAce aceEditor
@@ -15,10 +14,8 @@
 exprs_ui_minimal <- function(
   id = "",
   value = NULL,
-  key = c("suggest", "empty", "none"),
   auto_complete_list = NULL
 ) {
-  key <- match.arg(key)
 
   tagList(
     tags$style(".mutate-expression .shiny-ace {
