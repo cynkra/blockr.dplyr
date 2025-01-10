@@ -1,10 +1,5 @@
 linters: linters_with_defaults(
-    line_length_linter(80),
-    object_usage_linter = NULL,
-    commented_code_linter = NULL
-  )
-exclusions: list(
-    "inst/doc",
-    "tests/testthat",
-    "tests/testthat.R"
-  )
+  line_length_linter = NULL,
+  object_usage_linter = NULL,
+  commented_code_linter = NULL,
+  indentation_linter = NULL)

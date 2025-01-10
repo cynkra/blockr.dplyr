@@ -62,14 +62,13 @@ new_join_block <- function(type = character(), by = character(), ...) {
             ),
             state = list(
               type = reactive(input$type),
-              by = reactive(sels()),
-              by_opts = reactive(cols())
+              by = reactive(sels())
             )
           )
         }
       )
     },
-    function(ns, type, by, by_opts = character()) {
+    function(ns) {
       tagList(
         selectInput(
           inputId = ns("expression", "type"),
@@ -80,8 +79,7 @@ new_join_block <- function(type = character(), by = character(), ...) {
         selectInput(
           inputId = ns("expression", "by"),
           label = "By columns",
-          choices = by_opts,
-          selected = by,
+          choices = list(),
           multiple = TRUE
         )
       )
