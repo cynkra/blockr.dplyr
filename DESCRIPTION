@@ -25,7 +25,10 @@ Imports:
     shiny,
     blockr.core (>= 0.0.1),
     dplyr,
-    glue
+    shinyAce,
+    glue,
+    htmltools,
+    bslib
 Suggests:
     testthat (>= 3.0.0)
 Remotes: cynkra/blockr.core
