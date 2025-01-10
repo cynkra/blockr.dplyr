@@ -8,11 +8,7 @@
 #' @param ... Forwarded to [new_block()]
 #'
 #' @export
-new_arrange_block <- function(columns = character(), desc = "False", ...) {
-
-  desc_opts <- c("True", "False")
-
-  desc <- match.arg(desc, desc_opts)
+new_arrange_block <- function(columns = character(), desc = FALSE, ...) {
 
   new_transform_block(
     function(data) {
@@ -34,42 +30,45 @@ new_arrange_block <- function(columns = character(), desc = "False", ...) {
             )
           )
 
+          observe(
+            updateCheckboxInput(
+              session,
+              inputId = "desc",
+              value = desc
+            )
+          )
+
           list(
-            expr = reactive(
+            expr = reactive({
+              expr_str <- if (input$desc) {
+                glue::glue('dplyr::desc({glue::glue_collapse(sels(), sep = ", ")})')
+              } else {
+                glue::glue_collapse(sels(), sep = ", ")
+              }
               parse(text = glue::glue(
-                "dplyr::arrange(
-                  data,
-                  {if (input$desc == 'True')
-                    glue::glue('dplyr::desc({glue::glue_collapse(sels(), sep = ', ')})')
-                   else
-                    glue::glue_collapse(sels(), sep = ', ')
-                  }
-                )"
+                "dplyr::arrange(data, {expr_str})"
               ))[1]
-            ),
+            }),
             state = list(
               columns = reactive(sels()),
-              choices = reactive(cols()),
               desc = reactive(input$desc)
             )
           )
         }
       )
     },
-    function(ns, columns, desc, choices = character()) {
+    function(ns) {
       tagList(
         selectInput(
           ns("expression", "columns"),
           label = "Arrange by:",
-          choices = choices,
-          selected = columns,
+          choices = NULL,
           multiple = TRUE
         ),
-        selectInput(
+        checkboxInput(
           ns("expression", "desc"),
-          label = "Sort in descending order?",
-          choices = desc_opts,
-          selected = desc
+          label = "Descending order",
+          value = FALSE
         )
       )
     },
