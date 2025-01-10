@@ -29,7 +29,6 @@ Imports:
     glue,
     htmltools,
     bslib
-    glue
 Suggests:
     testthat (>= 3.0.0)
 Remotes: cynkra/blockr.core

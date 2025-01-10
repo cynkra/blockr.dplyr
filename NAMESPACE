@@ -3,6 +3,7 @@
 export(exprs_ui)
 export(mod_keyvalue_server)
 export(mod_keyvalue_ui)
+export(new_arrange_block)
 export(new_join_block)
 export(new_mutate_block)
 export(new_select_block)
