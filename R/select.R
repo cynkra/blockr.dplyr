@@ -52,6 +52,9 @@ new_select_block <- function(columns = character(), ...) {
         multiple = TRUE
       )
     },
+    dat_val = function(data) {
+      stopifnot(is.data.frame(data))
+    },
     class = "select_block",
     ...
   )
