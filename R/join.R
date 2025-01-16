@@ -84,7 +84,7 @@ new_join_block <- function(type = character(), by = character(), ...) {
         )
       )
     },
-    dat_val = function(x) {
+    dat_val = function(x, y) {
       stopifnot(is.data.frame(x), is.data.frame(y))
     },
     class = "join_block",
