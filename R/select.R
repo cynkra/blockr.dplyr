@@ -16,17 +16,30 @@ new_select_block <- function(columns = character(), ...) {
         function(input, output, session) {
 
           sels <- reactiveVal(columns)
-          cols <- reactive(colnames(data()))
+          cols <- reactive(
+            {
+              colnames(data())
+            }
+          )
 
-          observeEvent(input$columns, sels(input$columns))
+          observeEvent(
+            input$columns,
+            {
+              sels(input$columns)
+            }
+          )
 
           observe(
-            updateSelectInput(
-              session,
-              inputId = "columns",
-              choices = cols(),
-              selected = sels()
-            )
+            {
+              sels(intersect(sels(), cols()))
+
+              updateSelectInput(
+                session,
+                inputId = "columns",
+                choices = cols(),
+                selected = sels()
+              )
+            }
           )
 
           list(
@@ -38,7 +51,7 @@ new_select_block <- function(columns = character(), ...) {
               )
             ),
             state = list(
-              columns = reactive(sels())
+              columns = sels
             )
           )
         }

@@ -32,9 +32,12 @@ new_join_block <- function(type = character(), by = character(), ...) {
         function(input, output, session) {
 
           sels <- reactiveVal(by)
-          cols <- reactive(by_choices(x(), y()))
+          type <- reactiveVal(type)
 
           observeEvent(input$by, sels(input$by))
+          observeEvent(input$type, type(input$type))
+
+          cols <- reactive(by_choices(x(), y()))
 
           observe(
             updateSelectInput(
@@ -53,7 +56,7 @@ new_join_block <- function(type = character(), by = character(), ...) {
                   func = eval(
                     bquote(
                       as.call(c(as.symbol("::"), quote(dplyr), quote(.(fun)))),
-                      list(fun = as.name(input$type))
+                      list(fun = as.name(type()))
                     )
                   ),
                   cols = sels()
@@ -61,8 +64,8 @@ new_join_block <- function(type = character(), by = character(), ...) {
               )
             ),
             state = list(
-              type = reactive(input$type),
-              by = reactive(sels())
+              type = type,
+              by = sels
             )
           )
         }
