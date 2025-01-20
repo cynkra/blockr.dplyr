@@ -4,34 +4,20 @@
 \alias{mod_kvexpr_server}
 \title{Mutate key-value server module}
 \usage{
-mod_kvexpr_server(
-  id,
-  get_value,
-  get_cols,
-  submit = TRUE,
-  multiple = TRUE,
-  key = "suggest"
-)
+mod_kvexpr_server(id, get_value, get_cols)
 }
 \arguments{
 \item{id}{The module ID}
 
-\item{get_value}{Function that returns initial values}
+\item{get_value}{Function that returns initial value}
 
 \item{get_cols}{Function that returns column names for autocompletion}
-
-\item{submit}{Whether to show a submit button (defaults to TRUE)}
-
-\item{multiple}{Whether multiple key-value pairs are allowed
-(defaults to TRUE)}
-
-\item{key}{The key display mode: "suggest", "empty", or "none"}
 }
 \value{
-A reactive expression containing the current key-value pairs
+A reactive expression containing the current key-value pair
 }
 \description{
-A Shiny module that manages key-value pairs for mutate expressions.
+A Shiny module that manages a key-value pair for mutate expressions.
 Handles user input, autocompletion, and value updates.
 }
 \examples{

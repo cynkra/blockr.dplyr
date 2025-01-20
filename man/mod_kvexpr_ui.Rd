@@ -4,27 +4,10 @@
 \alias{mod_kvexpr_ui}
 \title{Create key-value UI module}
 \usage{
-mod_kvexpr_ui(
-  value,
-  multiple,
-  submit,
-  key,
-  auto_complete_list = NULL,
-  ns = function(x) x
-)
+mod_kvexpr_ui(id)
 }
 \arguments{
-\item{value}{Initial values}
-
-\item{multiple}{Whether multiple key-value pairs are allowed}
-
-\item{submit}{Whether to show submit button}
-
-\item{key}{Key display mode}
-
-\item{auto_complete_list}{List of autocomplete options}
-
-\item{ns}{Namespace function}
+\item{id}{The module ID}
 }
 \value{
 A div containing the UI elements

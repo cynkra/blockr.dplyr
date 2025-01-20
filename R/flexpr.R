@@ -55,7 +55,10 @@ mod_flexpr_server <- function(
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
 
-    shinyAce::aceAutocomplete("expr", session = session)
+    # Initialize ace editor with custom completions
+    observe({
+      initialize_ace_editor(session, ns("expr"), get_cols_expr())
+    })
 
     # Initialize reactive values
     r_value <- reactiveVal()
@@ -77,14 +80,10 @@ mod_flexpr_server <- function(
     # Update expression input when switching to expression mode
     observeEvent(input$use_expr, {
       if (isTruthy(input$use_expr)) {
-
         shinyAce::updateAceEditor(
           session,
           "expr",
-          value = r_value(),
-          autoComplete = "live",
-          autoCompleters = c("static", "rlang"),
-          autoCompleteList = list(data = get_cols_expr())
+          value = r_value()
         )
       }
     })
@@ -188,8 +187,9 @@ mod_flexpr_ui <- function(ns = function(x) x) {
           condition = sprintf("input['%s'] == true", ns("use_expr")),
           div(
             class = "w-100",
-            exprs_ui_minimal(
-              id = ns("expr")
+            setup_ace_editor(
+              ns("expr"),
+              height = "20px"
             )
           )
         )
@@ -228,6 +228,7 @@ run_flexpr_example <- function() {
   shinyApp(
     ui = bslib::page_fluid(
       theme = bslib::bs_theme(version = 5),
+      shinyjs::useShinyjs(),
       div(
         class = "container mt-3",
         mod_flexpr_ui(ns = NS("flexpr")),
@@ -243,6 +244,49 @@ run_flexpr_example <- function() {
 
       output$value <- renderPrint({
         r_ans()
+      })
+    }
+  )
+}
+
+#' Run example app demonstrating custom autocompletion
+#'
+#' This function launches a minimal Shiny app that demonstrates the custom
+#' autocompletion functionality with a simple example.
+#'
+#' @examples
+#' \dontrun{
+#' pkgload::load_all(); run_ace_example()
+#' }
+#' @export
+run_ace_example <- function() {
+  df <- data.frame(
+    Sepal.Length = rnorm(10),
+    Sepal.Width = rnorm(10),
+    Species = sample(c("setosa", "versicolor"), 10, replace = TRUE)
+  )
+
+  shinyApp(
+    ui = bslib::page_fluid(
+      theme = bslib::bs_theme(version = 5),
+      shinyjs::useShinyjs(),
+      div(
+        class = "container mt-3",
+        setup_ace_editor(
+          "expr",
+          height = "20px"
+        ),
+        verbatimTextOutput("value")
+      )
+    ),
+    server = function(input, output, session) {
+      # Initialize ace editor with custom completions
+      observe({
+        initialize_ace_editor(session, "expr", colnames(df))
+      })
+
+      output$value <- renderPrint({
+        input$expr
       })
     }
   )
