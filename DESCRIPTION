@@ -28,7 +28,9 @@ Imports:
     shinyAce,
     glue,
     htmltools,
-    bslib
+    bslib,
+    jsonlite,
+    shinyjs
 Suggests:
     testthat (>= 3.0.0)
 Remotes: cynkra/blockr.core
