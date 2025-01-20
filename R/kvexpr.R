@@ -23,10 +23,8 @@ mod_kvexpr_server <- function(
   id,
   get_value,
   get_cols,
-  multiple = TRUE,
-  key = c("suggest", "empty")
+  multiple = TRUE
 ) {
-  key <- match.arg(key)
 
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
@@ -160,32 +158,14 @@ get_exprs <- function(prefix, input) {
 #' @param ns Namespace function
 #' @return A div containing the UI elements
 #' @export
-mod_kvexpr_ui <- function(value,
-                         key = c("suggest", "empty"),
-                         auto_complete_list = NULL,
-                         ns = function(x) x) {
-  key <- match.arg(key)
-
-  names <- names(value)
-  values <- unname(value)
-  ids <- ns(paste0("pl_", seq(value)))
-
-  core_ui <- tagList(Map(
-    function(name, value, id) {
-      kvexpr_ui(
-        id,
-        value_name = name,
-        value_val = value
-      )
-    },
-    name = names,
-    value = values,
-    id = ids
-  ))
+mod_kvexpr_ui <- function(ns = function(x) x) {
 
   div(
-    id = ns("pls"),
-    core_ui
+      kvexpr_ui(
+        ns("pl_1"),
+        value_name = "newcol",
+        value_val = "99"
+      )
   )
 }
 
@@ -203,18 +183,14 @@ run_kvexpr_example <- function() {
   shinyApp(
     ui = bslib::page_fluid(
       theme = bslib::bs_theme(version = 5),
-      mod_kvexpr_ui(
-        value = list(newcol = "x + 1"),
-        ns = NS("kv")
-      ),
+      mod_kvexpr_ui(ns = NS("kv")),
       verbatimTextOutput("value")
     ),
     server = function(input, output, session) {
       r_ans <- mod_kvexpr_server(
         "kv",
         get_value = function() list(newcol = "x + 1"),
-        get_cols = function() c("x", "y", "z"),
-        key = "suggest"
+        get_cols = function() c("x", "y", "z")
       )
 
       output$value <- renderPrint({
