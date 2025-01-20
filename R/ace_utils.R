@@ -16,10 +16,9 @@ get_default_categories <- function() {
 #'
 #' @param id The editor ID
 #' @param value Initial value
-#' @param height Editor height
 #' @return A tagList containing the editor setup
 #' @noRd
-setup_ace_editor <- function(id, value = "", height = "20px") {
+setup_ace_editor <- function(id, value = "") {
   # Custom completer script
   custom_completer <- sprintf('
     var customCompleter = {
@@ -99,7 +98,7 @@ setup_ace_editor <- function(id, value = "", height = "20px") {
           mode = "r",
           autoComplete = "live",
           autoCompleters = c("custom"),
-          height = height,
+          height = "20px",
           showPrintMargin = FALSE,
           highlightActiveLine = FALSE,
           tabSize = 2,

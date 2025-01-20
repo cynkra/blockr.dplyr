@@ -155,10 +155,7 @@ mod_flexpr_ui <- function(ns = function(x) x) {
         ),
         conditionalPanel(
           condition = sprintf("input['%s'] == true", ns("use_expr")),
-          setup_ace_editor(
-            ns("expr"),
-            height = "20px"
-          )
+          setup_ace_editor(ns("expr"))
         )
       ),
       div(
@@ -280,10 +277,7 @@ run_ace_example <- function() {
       shinyjs::useShinyjs(),
       div(
         class = "container mt-3",
-        setup_ace_editor(
-          "expr",
-          height = "20px"
-        ),
+        setup_ace_editor(ns("expr")),
         verbatimTextOutput("value")
       )
     ),
