@@ -26,7 +26,7 @@ new_mutate_block <- function(r_strings, ...) {
             colnames(data())
           })
 
-          r_ans <- mod_keyvalue_server(
+          r_ans <- mod_kvexpr_server(
             id = "kv",
             get_value = \() c(newcol = 'paste("my", "expression")'),
             get_cols = \() colnames(data())
@@ -70,14 +70,7 @@ new_mutate_block <- function(r_strings, ...) {
       )
     },
     function(ns) {
-      mod_keyvalue_ui(
-        value = list(newcol = ""),
-        multiple = FALSE,
-        submit = TRUE,
-        key = "suggest",
-        auto_complete_list = list(data = character()),
-        ns = NS(ns("expression", "kv"))
-      )
+      mod_kvexpr_ui(ns("expression", "kv"))
     },
     class = "mutate_block",
     ...

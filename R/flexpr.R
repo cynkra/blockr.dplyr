@@ -35,6 +35,7 @@ expr_to_cols <- function(expr, cols) {
 #' @param id The module ID
 #' @param get_value Function that returns initial values
 #' @param get_cols Function that returns column names for autocompletion
+#' @param get_cols_expr Function that returns column names for expression autocompletion (defaults to get_cols)
 #' @param submit Whether to show a submit button (defaults to TRUE)
 #'
 #' @return A reactive expression containing the current expressions
@@ -127,9 +128,6 @@ mod_flexpr_server <- function(
 
 #' Create flexible expression UI module
 #'
-#' @param value Initial values
-#' @param cols Available column names
-#' @param submit Whether to show submit button
 #' @param ns Namespace function
 #'
 #' @return A div containing the UI elements
@@ -263,6 +261,7 @@ run_flexpr_example <- function() {
 #' \dontrun{
 #' pkgload::load_all(); run_ace_example()
 #' }
+#' @importFrom shiny NS
 #' @export
 run_ace_example <- function() {
   df <- data.frame(
@@ -277,18 +276,20 @@ run_ace_example <- function() {
       shinyjs::useShinyjs(),
       div(
         class = "container mt-3",
-        setup_ace_editor(ns("expr")),
-        verbatimTextOutput("value")
+        setup_ace_editor(NS("ace")("expr")),
+        verbatimTextOutput(NS("ace")("value"))
       )
     ),
     server = function(input, output, session) {
+      ns <- NS("ace")
+
       # Initialize ace editor with custom completions
       observe({
-        initialize_ace_editor(session, "expr", colnames(df))
+        initialize_ace_editor(session, ns("expr"), colnames(df))
       })
 
-      output$value <- renderPrint({
-        input$expr
+      output[[ns("value")]] <- renderPrint({
+        input[[ns("expr")]]
       })
     }
   )

@@ -8,12 +8,6 @@ mod_flexpr_ui(ns = function(x) x)
 }
 \arguments{
 \item{ns}{Namespace function}
-
-\item{value}{Initial values}
-
-\item{cols}{Available column names}
-
-\item{submit}{Whether to show submit button}
 }
 \value{
 A div containing the UI elements

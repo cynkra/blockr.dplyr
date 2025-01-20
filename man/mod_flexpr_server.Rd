@@ -19,6 +19,8 @@ mod_flexpr_server(
 
 \item{get_cols}{Function that returns column names for autocompletion}
 
+\item{get_cols_expr}{Function that returns column names for expression autocompletion (defaults to get_cols)}
+
 \item{submit}{Whether to show a submit button (defaults to TRUE)}
 }
 \value{
