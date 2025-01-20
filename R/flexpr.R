@@ -49,10 +49,13 @@ mod_flexpr_server <- function(
   id,
   get_value,
   get_cols,
+  get_cols_expr = get_cols,
   submit = TRUE
 ) {
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
+
+    shinyAce::aceAutocomplete("expr", session = session)
 
     # Initialize reactive values
     r_value <- reactiveVal()
@@ -74,10 +77,14 @@ mod_flexpr_server <- function(
     # Update expression input when switching to expression mode
     observeEvent(input$use_expr, {
       if (isTruthy(input$use_expr)) {
+
         shinyAce::updateAceEditor(
           session,
           "expr",
-          value = r_value()
+          value = r_value(),
+          autoComplete = "live",
+          autoCompleters = c("static", "rlang"),
+          autoCompleteList = list(data = get_cols_expr())
         )
       }
     })
@@ -89,7 +96,7 @@ mod_flexpr_server <- function(
         if (!is.null(selected)) {
           updateSelectInput(
             session,
-            "selected_cols",
+            "select",
             choices = get_cols(),
             selected = selected
           )
@@ -102,8 +109,8 @@ mod_flexpr_server <- function(
       if (isTruthy(input$use_expr)) {
         if (!is.null(input$expr)) input$expr else ""
       } else {
-        if (!is.null(input$selected_cols) && length(input$selected_cols) > 0) {
-          paste(input$selected_cols, collapse = ", ")
+        if (!is.null(input$select) && length(input$select) > 0) {
+          paste(input$select, collapse = ", ")
         } else {
           ""
         }
@@ -130,11 +137,7 @@ mod_flexpr_server <- function(
 #' @importFrom shiny NS actionButton icon div selectInput checkboxInput
 #' @importFrom htmltools tagList tags
 #' @export
-mod_flexpr_ui <- function(
-  value,
-  cols = c("Sepal.Length", "Sepal.Width"),
-  ns = function(x) x
-) {
+mod_flexpr_ui <- function(ns = function(x) x) {
   div(
     # Add custom CSS
     tags$style("
@@ -172,9 +175,9 @@ mod_flexpr_ui <- function(
           div(
             class = "w-100",
             selectInput(
-              ns("selected_cols"),
+              ns("select"),
               label = NULL,
-              choices = cols,
+              choices = NULL,
               multiple = TRUE,
               selected = NULL,
               width = "100%"
@@ -227,11 +230,7 @@ run_flexpr_example <- function() {
       theme = bslib::bs_theme(version = 5),
       div(
         class = "container mt-3",
-        mod_flexpr_ui(
-          value = NULL,
-          cols = colnames(df),
-          ns = NS("flexpr")
-        ),
+        mod_flexpr_ui(ns = NS("flexpr")),
         verbatimTextOutput("value")
       )
     ),
