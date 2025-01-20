@@ -1,14 +1,14 @@
 #' Mutate block constructor
 #'
 #' This block allows to add new variables and preserve existing ones
-#' (see [dplyr::mutate()]).
+#' (see [dplyr::mutate()]). Changes are applied after clicking the submit button.
 #'
 #' @param r_strings Reactive expression returning character vector of
 #'   expressions
 #' @param ... Additional arguments forwarded to [new_block()]
 #'
 #' @return A block object for mutate operations
-#' @importFrom shiny req showNotification NS moduleServer reactive
+#' @importFrom shiny req showNotification NS moduleServer reactive actionButton observeEvent icon
 #' @importFrom glue glue
 #' @seealso [new_transform_block()]
 #' @examples
@@ -38,7 +38,11 @@ new_mutate_block <- function(r_strings, ...) {
             get_cols = \() colnames(data())
           )
 
-          r_expr <- reactive({
+          # Store the validated expression
+          r_validated <- reactiveVal()
+
+          # Validate and update on submit
+          observeEvent(input$submit, {
             strings <- r_ans()
             req(strings)
             stopifnot(is.character(strings), !is.null(names(strings)))
@@ -63,11 +67,11 @@ new_mutate_block <- function(r_strings, ...) {
               )
               return()
             }
-            expr
+            r_validated(expr)
           })
 
           list(
-            expr = r_expr,
+            expr = r_validated,
             state = list(
               r_strings = r_ans
             )
@@ -76,7 +80,18 @@ new_mutate_block <- function(r_strings, ...) {
       )
     },
     function(ns) {
-      mod_kvexpr_ui(ns("expression", "kv"))
+      div(
+        mod_kvexpr_ui(ns("expression", "kv")),
+        div(
+          style = "text-align: right; margin-top: 10px;",
+          actionButton(
+            ns("expression", "submit"),
+            "Submit",
+            icon = icon("paper-plane"),
+            class = "btn-primary"
+          )
+        )
+      )
     },
     class = "mutate_block",
     ...
