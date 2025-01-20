@@ -1,3 +1,17 @@
+#' Get default function categories for autocompletion
+#' @noRd
+get_default_categories <- function() {
+  list(
+    arithmetic = c("abs", "sign", "ceiling", "floor", "round", "trunc",
+                  "log", "log2", "log10", "exp", "sqrt"),
+    aggregate = c("mean", "sum", "min", "max"),
+    offset = c("lead", "lag", "cumsum", "cumprod", "cummin", "cummax"),
+    logical = c("if_else", "case_when"),
+    string = c("str_c", "paste", "paste0", "str_sub", "str_to_lower", "str_to_upper"),
+    ranking = c("row_number", "min_rank", "dense_rank", "percent_rank", "ntile")
+  )
+}
+
 #' Create a minimal UI element for a single expression
 #'
 #' @param id Character string, an identifier for the UI element
@@ -19,15 +33,7 @@ exprs_ui_minimal <- function(
     var customCompleter = {
       getCompletions: function(editor, session, pos, prefix, callback) {
         // Categories will be updated dynamically from the server
-        var categories = window.aceCategories || {
-          arithmetic: ["abs", "sign", "ceiling", "floor", "round", "trunc",
-                      "log", "log2", "log10", "exp", "sqrt"],
-          aggregate: ["mean", "sum", "min", "max"],
-          offset: ["lead", "lag", "cumsum", "cumprod", "cummin", "cummax"],
-          logical: ["if_else", "case_when"],
-          string: ["str_c", "paste", "paste0", "str_sub", "str_to_lower", "str_to_upper"],
-          ranking: ["row_number", "min_rank", "dense_rank", "percent_rank", "ntile"]
-        };
+        var categories = window.aceCategories || %s;
 
         var wordList = [];
         Object.keys(categories).forEach(function(category) {
@@ -49,15 +55,6 @@ exprs_ui_minimal <- function(
           return a.meta.localeCompare(b.meta);
         });
         callback(null, wordList);
-      },
-
-      insertMatch: function(editor, data) {
-        if (data.isColumn) {
-          editor.insert(data.value);
-        } else {
-          editor.insert(data.caption + "()");
-          editor.navigateLeft(1);
-        }
       }
     };
 
@@ -81,7 +78,7 @@ exprs_ui_minimal <- function(
     });
 
     ace.require("ace/ext/language_tools").addCompleter(customCompleter);
-  ')
+  ', jsonlite::toJSON(get_default_categories(), auto_unbox = TRUE))
 
   tagList(
     tags$style(".mutate-expression .shiny-ace {
@@ -156,16 +153,8 @@ run_minimal_example <- function() {
       # Initialize ace editor
       observe({
         # Update categories with current column names
-        categories <- list(
-          arithmetic = c("abs", "sign", "ceiling", "floor", "round", "trunc",
-                        "log", "log2", "log10", "exp", "sqrt"),
-          aggregate = c("mean", "sum", "min", "max"),
-          offset = c("lead", "lag", "cumsum", "cumprod", "cummin", "cummax"),
-          logical = c("if_else", "case_when"),
-          string = c("str_c", "paste", "paste0", "str_sub", "str_to_lower", "str_to_upper"),
-          ranking = c("row_number", "min_rank", "dense_rank", "percent_rank", "ntile"),
-          column = colnames(df)  # Add column names as a category
-        )
+        categories <- get_default_categories()
+        categories$column <- colnames(df)  # Add column names as a category
 
         # Convert to JSON and update in JavaScript
         js <- sprintf("window.updateAceCategories(%s);", jsonlite::toJSON(categories))
