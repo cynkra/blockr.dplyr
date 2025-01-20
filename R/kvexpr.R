@@ -32,6 +32,9 @@ mod_kvexpr_server <- function(
       get_cols()
     })
 
+    # Track if value was set by user
+    r_user_input <- reactiveVal(FALSE)
+
     # Update autocomplete list when columns change
     observe({
       shinyAce::updateAceEditor(
@@ -44,16 +47,18 @@ mod_kvexpr_server <- function(
     # Update editor values for non-user changes
     observe({
       val <- r_value()
-      shinyAce::updateAceEditor(
-        session,
-        editorId = "pl_val",
-        value = unname(val)
-      )
-      shinyAce::updateAceEditor(
-        session,
-        editorId = "pl_name",
-        value = names(val)
-      )
+      if (!r_user_input()) {
+        shinyAce::updateAceEditor(
+          session,
+          editorId = "pl_val",
+          value = unname(val)
+        )
+        shinyAce::updateAceEditor(
+          session,
+          editorId = "pl_name",
+          value = names(val)
+        )
+      }
     })
 
     # Handle user input
@@ -62,6 +67,7 @@ mod_kvexpr_server <- function(
       val <- input$pl_val
 
       if (!is.null(name) && !is.null(val)) {
+        r_user_input(TRUE)
         r_value(setNames(val, name))
       }
     })
@@ -74,17 +80,84 @@ mod_kvexpr_server <- function(
 #' Create key-value UI module
 #'
 #' @param id The module ID
-#' @param value_name Initial name value
-#' @param value_val Initial value
-#' @param auto_complete_list List of autocomplete options
 #' @return A div containing the UI elements
 #' @export
 mod_kvexpr_ui <- function(id) {
   ns <- NS(id)
 
-  div(
-    kvexpr_ui(
-      ns("pl")
+  tagList(
+    tags$style(".mutate-expression .shiny-ace {
+      border: none;
+      margin: 0.75rem;
+    }
+
+    .mutate-expression .mutate-column {
+      width: 15%;
+    }
+
+    .mutate-expression .mutate-code {
+      flex: 1;
+      margin-left: 0;
+    }
+
+    .mutate-expression .mutate-equal {
+      background-color: #e9ecef;
+      border-color: #dee2e6;
+      padding-left: 0.75rem;
+      padding-right: 0.75rem;
+    }
+
+    .mutate-expression {
+      border: 1px solid #dee2e6;
+    }"),
+    div(
+      id = ns("pl"),
+      class = paste(
+        "input-group d-flex justify-content-between mt-1 mb-3",
+        "mutate-expression border rounded"
+      ),
+      div(
+        class = "mutate-column",
+        shinyAce::aceEditor(
+          outputId = ns("pl_name"),
+          debounce = 300,
+          value = "newcol",
+          mode = "r",
+          autoComplete = "disabled",
+          height = "20px",
+          showPrintMargin = FALSE,
+          highlightActiveLine = FALSE,
+          tabSize = 2,
+          theme = "tomorrow",
+          maxLines = 1,
+          fontSize = 14,
+          showLineNumbers = FALSE
+        )
+      ),
+      div(
+        class = "input-group-text mutate-equal",
+        icon("equals")
+      ),
+      div(
+        class = "mutate-code",
+        shinyAce::aceEditor(
+          outputId = ns("pl_val"),
+          debounce = 300,
+          value = "x + 1",
+          mode = "r",
+          autoComplete = "live",
+          autoCompleters = c("rlang", "static"),
+          autoCompleteList = NULL,
+          height = "20px",
+          showPrintMargin = FALSE,
+          highlightActiveLine = FALSE,
+          tabSize = 2,
+          theme = "tomorrow",
+          maxLines = 1,
+          fontSize = 14,
+          showLineNumbers = FALSE
+        )
+      )
     )
   )
 }
