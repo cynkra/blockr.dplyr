@@ -35,13 +35,9 @@ mod_kvexpr_server <- function(
     # Track if value was set by user
     r_user_input <- reactiveVal(FALSE)
 
-    # Update autocomplete list when columns change
+    # Initialize ace editor with custom completions
     observe({
-      shinyAce::updateAceEditor(
-        session,
-        editorId = "pl_val",
-        autoCompleteList = list(data = r_cols())
-      )
+      initialize_ace_editor(session, ns("pl_val"), r_cols())
     })
 
     # Update editor values for non-user changes
@@ -86,35 +82,45 @@ mod_kvexpr_ui <- function(id) {
   ns <- NS(id)
 
   tagList(
-    tags$style(".mutate-expression .shiny-ace {
-      border: none;
-      margin: 0.75rem;
-    }
+    shinyjs::useShinyjs(),
+    tags$style("
+      .mutate-expression .shiny-ace {
+        border: none;
+        margin: 7px;
+        margin-bottom: 7.5px;   /* to align with select box */
+      }
 
-    .mutate-expression .mutate-column {
-      width: 15%;
-    }
+      .mutate-expression .mutate-column {
+        width: 15%;
+      }
 
-    .mutate-expression .mutate-code {
-      flex: 1;
-      margin-left: 0;
-    }
+      .mutate-expression .mutate-code {
+        flex: 1;
+      }
 
-    .mutate-expression .mutate-equal {
-      background-color: #e9ecef;
-      border-color: #dee2e6;
-      padding-left: 0.75rem;
-      padding-right: 0.75rem;
-    }
+      .mutate-expression .mutate-equal {
+        background-color: #e9ecef;
+        border-color: #dee2e6;
+        padding-left: 0.75rem;
+        padding-right: 0.75rem;
+      }
 
-    .mutate-expression {
-      border: 1px solid #dee2e6;
-    }"),
+      .mutate-expression .input-group {
+        border: none !important;
+      }
+
+     .input-group .input-group-text {
+        padding-top: 0;
+        padding-bottom: 0;
+        height: 30px;
+      }
+
+    "),
     div(
       id = ns("pl"),
       class = paste(
-        "input-group d-flex justify-content-between mt-1 mb-3",
-        "mutate-expression border rounded"
+        "input-group mb-3",
+        "mutate-expression border border-dark-subtle rounded"
       ),
       div(
         class = "mutate-column",
@@ -140,23 +146,7 @@ mod_kvexpr_ui <- function(id) {
       ),
       div(
         class = "mutate-code",
-        shinyAce::aceEditor(
-          outputId = ns("pl_val"),
-          debounce = 300,
-          value = "",
-          mode = "r",
-          autoComplete = "live",
-          autoCompleters = c("rlang", "static"),
-          autoCompleteList = NULL,
-          height = "20px",
-          showPrintMargin = FALSE,
-          highlightActiveLine = FALSE,
-          tabSize = 2,
-          theme = "tomorrow",
-          maxLines = 1,
-          fontSize = 14,
-          showLineNumbers = FALSE
-        )
+        setup_ace_editor(ns("pl_val"))
       )
     )
   )
@@ -176,6 +166,7 @@ run_kvexpr_example <- function() {
   shinyApp(
     ui = bslib::page_fluid(
       theme = bslib::bs_theme(version = 5),
+      shinyjs::useShinyjs(),
       mod_kvexpr_ui("kv"),
       verbatimTextOutput("value")
     ),
