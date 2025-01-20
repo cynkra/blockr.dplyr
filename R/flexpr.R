@@ -114,12 +114,8 @@ mod_flexpr_server <- function(
       r_value(r_current())
     }, ignoreInit = TRUE)
 
-    # Return value based on submit mode
-    if (submit) {
-      reactive(r_value()) |> bindEvent(input$i_submit)
-    } else {
-      reactive(r_value())
-    }
+    reactive(r_value())
+
   })
 }
 
@@ -137,7 +133,6 @@ mod_flexpr_server <- function(
 mod_flexpr_ui <- function(
   value,
   cols = c("Sepal.Length", "Sepal.Width"),
-  submit = TRUE,
   ns = function(x) x
 ) {
   div(
@@ -183,20 +178,6 @@ mod_flexpr_ui <- function(
             icon("pencil")
           )
         )
-      )
-    ),
-    div(
-      class = "w-100 d-flex justify-content-end",
-      div(
-        class = "m-0 mb-5",
-        if (submit) {
-          actionButton(
-            ns("i_submit"),
-            label = "Submit",
-            icon = icon("paper-plane"),
-            class = "btn btn-primary"
-          )
-        }
       )
     )
   )
