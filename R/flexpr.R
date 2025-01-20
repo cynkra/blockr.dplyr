@@ -5,14 +5,15 @@
 #' @return Character vector of valid column names or NULL if invalid format
 #' @examples
 #' # Valid cases (return column names)
-#' expr_to_cols("Sepal.Length, Sepal.Width", colnames(iris))  # c("Sepal.Length", "Sepal.Width")
-#' expr_to_cols("Species", colnames(iris))                    # "Species"
+#' df <- data.frame(x = 1:3, y = 4:6, z = 7:9)
+#' expr_to_cols("x, y", colnames(df))  # c("x", "y")
+#' expr_to_cols("z", colnames(df))     # "z"
 #'
 #' # Invalid cases (return NULL)
-#' expr_to_cols("paste(Sepal.Length, Sepal.Width)", colnames(iris))  # NULL (not comma-separated)
-#' expr_to_cols("foo, bar", colnames(iris))                          # NULL (invalid columns)
-#' expr_to_cols("", colnames(iris))                                  # NULL (empty)
-#' expr_to_cols(NULL, colnames(iris))                               # NULL
+#' expr_to_cols("paste(x, y)", colnames(df))  # NULL (not comma-separated)
+#' expr_to_cols("foo, bar", colnames(df))     # NULL (invalid columns)
+#' expr_to_cols("", colnames(df))             # NULL (empty)
+#' expr_to_cols(NULL, colnames(df))           # NULL
 #' @noRd
 expr_to_cols <- function(expr, cols) {
   if (is.null(expr) || !nzchar(expr)) return(NULL)
@@ -125,9 +126,10 @@ mod_flexpr_server <- function(
 #' Create flexible expression UI module
 #'
 #' @param value Initial values
+#' @param cols Available column names
 #' @param submit Whether to show submit button
-#' @param auto_complete_list List of autocomplete options
 #' @param ns Namespace function
+#'
 #' @return A div containing the UI elements
 #' @importFrom shiny NS actionButton icon div selectInput checkboxInput
 #' @importFrom htmltools tagList tags
@@ -211,6 +213,8 @@ mod_flexpr_ui <- function(
 #' }
 #' @export
 run_flexpr_example <- function() {
+  df <- data.frame(x = 1:10, y = 11:20, z = 21:30)
+
   shinyApp(
     ui = bslib::page_fluid(
       theme = bslib::bs_theme(version = 5),
@@ -218,7 +222,7 @@ run_flexpr_example <- function() {
         class = "container mt-3",
         mod_flexpr_ui(
           value = NULL,
-          cols = colnames(iris),
+          cols = colnames(df),
           ns = NS("flexpr")
         ),
         verbatimTextOutput("value")
@@ -227,8 +231,8 @@ run_flexpr_example <- function() {
     server = function(input, output, session) {
       r_ans <- mod_flexpr_server(
         "flexpr",
-        get_value = function() "paste(Sepal.Length, Sepal.Width)",
-        get_cols = function() colnames(iris)
+        get_value = function() "paste(x, y)",
+        get_cols = function() colnames(df)
       )
 
       output$value <- renderPrint({

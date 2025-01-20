@@ -14,11 +14,11 @@ mod_flexpr_ui(
 \arguments{
 \item{value}{Initial values}
 
+\item{cols}{Available column names}
+
 \item{submit}{Whether to show submit button}
 
 \item{ns}{Namespace function}
-
-\item{auto_complete_list}{List of autocomplete options}
 }
 \value{
 A div containing the UI elements

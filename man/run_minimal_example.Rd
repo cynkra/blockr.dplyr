@@ -2,7 +2,7 @@
 % Please edit documentation in R/exprs_ui_minimal.R
 \name{run_minimal_example}
 \alias{run_minimal_example}
-\title{Run example app demonstrating minimal expression UI}
+\title{Run minimal example app}
 \usage{
 run_minimal_example()
 }

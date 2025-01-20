@@ -55,7 +55,7 @@ exprs_ui_minimal <- function(
   )
 }
 
-#' Run example app demonstrating minimal expression UI
+#' Run minimal example app
 #'
 #' This function launches a minimal Shiny app that demonstrates the basic
 #' expression UI functionality.
@@ -66,6 +66,8 @@ exprs_ui_minimal <- function(
 #' }
 #' @export
 run_minimal_example <- function() {
+  df <- data.frame(x = 1:10, y = 11:20, z = 21:30)
+
   shinyApp(
     ui = bslib::page_fluid(
       theme = bslib::bs_theme(version = 5),
@@ -73,8 +75,8 @@ run_minimal_example <- function() {
         class = "container mt-3",
         exprs_ui_minimal(
           id = "expr",
-          value = "Sepal.Length, Sepal.Width",
-          auto_complete_list = list(data = colnames(iris))
+          value = "x, y",
+          auto_complete_list = list(data = colnames(df))
         ),
         verbatimTextOutput("value")
       )
