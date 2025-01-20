@@ -60,8 +60,9 @@ mod_flexpr_server <- function(
       r_value(get_value())
     })
 
+    # Initialize tooltips
     observe({
-      print(get_cols())
+      shinyjs::runjs("$('[data-bs-toggle=\"tooltip\"]').tooltip()")
     })
 
     # Set initial mode based on value format
@@ -115,7 +116,6 @@ mod_flexpr_server <- function(
     }, ignoreInit = TRUE)
 
     reactive(r_value())
-
   })
 }
 
@@ -136,47 +136,73 @@ mod_flexpr_ui <- function(
   ns = function(x) x
 ) {
   div(
+    # Add custom CSS
+    tags$style("
+      .input-wrapper {
+        position: relative;
+      }
+      .mode-toggle {
+        position: absolute;
+        right: 10px;
+        top: 50%;
+        transform: translateY(-50%);
+        z-index: 100;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+      }
+      .mode-toggle .form-check-input {
+        cursor: pointer;
+        width: 2em;
+        margin: 0;
+      }
+      .mode-toggle .fa-code {
+        color: var(--bs-gray-600);
+        font-size: 0.9em;
+      }
+    "),
+
     div(
-      class = "mb-3",
+      class = "input-wrapper",
       div(
-        class = "d-flex align-items-center gap-3",
-        div(
-          class = "flex-grow-1",
-          style = "min-width: 0;",  # prevents flex item from overflowing
-          conditionalPanel(
-            condition = sprintf("input['%s'] == false", ns("use_expr")),
-            div(
-              class = "w-100",
-              selectInput(
-                ns("selected_cols"),
-                label = NULL,
-                choices = cols,
-                multiple = TRUE,
-                selected = NULL,
-                width = "100%"
-              )
+        class = "flex-grow-1",
+        style = "min-width: 0;",  # prevents flex item from overflowing
+        conditionalPanel(
+          condition = sprintf("input['%s'] == false", ns("use_expr")),
+          div(
+            class = "w-100",
+            selectInput(
+              ns("selected_cols"),
+              label = NULL,
+              choices = cols,
+              multiple = TRUE,
+              selected = NULL,
+              width = "100%"
             )
-          ),
-          conditionalPanel(
-            condition = sprintf("input['%s'] == true", ns("use_expr")),
+          )
+        ),
+        conditionalPanel(
+          condition = sprintf("input['%s'] == true", ns("use_expr")),
+          div(
+            class = "w-100",
             exprs_ui_minimal(
               id = ns("expr")
             )
           )
-        ),
-        div(
-          class = "form-check form-switch",
-          tags$input(
-            class = "form-check-input",
-            type = "checkbox",
-            id = ns("use_expr"),
-            role = "switch"
-          ),
-          tags$label(
-            class = "form-check-label",
-            `for` = ns("use_expr"),
-            icon("pencil")
-          )
+        )
+      ),
+      # Toggle switch with icon
+      div(
+        class = "mode-toggle form-check form-switch",
+        icon("code"),
+        tags$input(
+          class = "form-check-input",
+          type = "checkbox",
+          id = ns("use_expr"),
+          role = "switch",
+          `data-bs-toggle` = "tooltip",
+          `data-bs-placement` = "left",
+          title = "Toggle between selection mode (off) and expression mode (on)"
         )
       )
     )
@@ -212,7 +238,7 @@ run_flexpr_example <- function() {
     server = function(input, output, session) {
       r_ans <- mod_flexpr_server(
         "flexpr",
-        get_value = function() "paste(x, y)",
+        get_value = function() "x, y",
         get_cols = function() colnames(df)
       )
 
