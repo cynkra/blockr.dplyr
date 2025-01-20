@@ -21,7 +21,7 @@
 #' }
 kvexpr_ui <- function(id = "",
                      value_name = "newcol",
-                     value_val = NULL,
+                     value_val = "paste(letters[1:5], collapse = '')",
                      auto_complete_list = NULL) {
   tagList(
     tags$style(".mutate-expression .shiny-ace {

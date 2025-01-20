@@ -1,16 +1,13 @@
 #' Mutate key-value server module
 #'
-#' A Shiny module that manages key-value pairs for mutate expressions.
+#' A Shiny module that manages a key-value pair for mutate expressions.
 #' Handles user input, autocompletion, and value updates.
 #'
 #' @param id The module ID
-#' @param get_value Function that returns initial values
+#' @param get_value Function that returns initial value
 #' @param get_cols Function that returns column names for autocompletion
-#' @param multiple Whether multiple key-value pairs are allowed
-#'   (defaults to TRUE)
-#' @param key The key display mode: "suggest" or "empty"
 #'
-#' @return A reactive expression containing the current key-value pairs
+#' @return A reactive expression containing the current key-value pair
 #' @importFrom shiny req showNotification NS moduleServer reactive
 #' @importFrom glue glue
 #' @seealso [new_transform_block()]
@@ -22,150 +19,73 @@
 mod_kvexpr_server <- function(
   id,
   get_value,
-  get_cols,
-  multiple = TRUE
+  get_cols
 ) {
-
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
 
     # Initialize reactive values
     r_value <- reactiveVal({
-      print(get_value())
       get_value()
     })
-
-    r_auto_complete_list <- reactive({
-      print(get_cols())
+    r_cols <- reactive({
       get_cols()
     })
 
     # Update autocomplete list when columns change
     observe({
-      if (!isTruthy(r_value_user())) {
-        shinyAce::updateAceEditor(
-          session,
-          editorId = paste0("pl_", 1, "_val"),
-          autoCompleteList = list(data = r_auto_complete_list())
-        )
-      }
+      shinyAce::updateAceEditor(
+        session,
+        editorId = "pl_val",
+        autoCompleteList = list(data = r_cols())
+      )
     })
 
     # Update editor values for non-user changes
     observe({
       val <- r_value()
-      if (!isTruthy(r_value_user())) {
-        shinyAce::updateAceEditor(
-          session,
-          editorId = paste0("pl_", 1, "_val"),
-          value = unname(val)
-        )
-        shinyAce::updateAceEditor(
-          session,
-          editorId = paste0("pl_", 1, "_name"),
-          value = names(val)
-        )
-      }
+      shinyAce::updateAceEditor(
+        session,
+        editorId = "pl_val",
+        value = unname(val)
+      )
+      shinyAce::updateAceEditor(
+        session,
+        editorId = "pl_name",
+        value = names(val)
+      )
     })
 
-    r_n_max <- reactiveVal(0L)
-    # Dynamically add aceAutocomplete and aceTooltip for new rows
+    # Handle user input
     observe({
-      n <- length(r_value())
-      if (n > r_n_max()) {
-        add <- (r_n_max() + 1):n
-        for (i in add) {
-          aceAutocomplete(paste0("pl_", i, "_val"))
-          aceTooltip(paste0("pl_", i, "_val"))
-        }
-        r_n_max(n)
-      }
-    }) |>
-      bindEvent(r_value())
+      name <- input$pl_name
+      val <- input$pl_val
 
-    # Handle user input and DOM cleanup
-    r_value_user <- reactiveVal(NULL)
-    observe({
-      ans <- get_exprs("pl_", input)
-      value <- isolate(r_value())
-
-      # Clean up previously used ids not removed from DOM
-      if (length(ans) > length(value)) {
-        idx <- seq_along(value)
-        if (length(idx) > 0) {
-          ans <- ans[idx]
-        }
-      }
-
-      if (length(ans) > 0) {
-        r_value_user(ans)
+      if (!is.null(name) && !is.null(val)) {
+        r_value(setNames(val, name))
       }
     })
-
-    # Update main value from user input
-    observe({
-      ans <- r_value_user()
-      if (!is.null(ans)) {
-        r_value(ans)
-      }
-    }) |>
-      bindEvent(r_value_user(), ignoreInit = TRUE)
 
     # Return reactive value
     reactive(r_value())
   })
 }
 
-#' Helper function to get input names matching a pattern
-#'
-#' @param prefix Prefix to match at start of input names
-#' @param input Shiny input object
-#' @param regex Regular expression to match in input names
-#' @return Character vector of matching input names
-get_input_names <- function(prefix, input, regex) {
-  input_names <- grep(paste0("^", prefix), names(input), value = TRUE)
-  grep(regex, input_names, value = TRUE)
-}
-
-#' Get remove button values
-#'
-#' @param prefix Prefix to match at start of input names
-#' @param input Shiny input object
-#' @return Named integer vector of remove button values
-get_rms <- function(prefix, input) {
-  input_names <- get_input_names(prefix, input, "_rm$")
-  vapply(setNames(input_names, input_names), \(x) input[[x]], 0L)
-}
-
-#' Extract expressions from input values
-#'
-#' @param prefix Prefix to match at start of input names
-#' @param input Shiny input object
-#' @return Named character vector of expressions
-get_exprs <- function(prefix, input) {
-  input_names <- get_input_names(prefix, input, "_name$|_val$")
-  ans <- lapply(setNames(input_names, input_names), \(x) input[[x]])
-  vals <- unlist(ans[grepl("_val$", names(ans))])
-  names <- unlist(ans[grepl("_name$", names(ans))])
-  setNames(vals, names)
-}
-
 #' Create key-value UI module
 #'
-#' @param value Initial values
-#' @param key Key display mode: "suggest" or "empty"
+#' @param id The module ID
+#' @param value_name Initial name value
+#' @param value_val Initial value
 #' @param auto_complete_list List of autocomplete options
-#' @param ns Namespace function
 #' @return A div containing the UI elements
 #' @export
-mod_kvexpr_ui <- function(ns = function(x) x) {
+mod_kvexpr_ui <- function(id) {
+  ns <- NS(id)
 
   div(
-      kvexpr_ui(
-        ns("pl_1"),
-        value_name = "newcol",
-        value_val = "99"
-      )
+    kvexpr_ui(
+      ns("pl")
+    )
   )
 }
 
@@ -183,13 +103,13 @@ run_kvexpr_example <- function() {
   shinyApp(
     ui = bslib::page_fluid(
       theme = bslib::bs_theme(version = 5),
-      mod_kvexpr_ui(ns = NS("kv")),
+      mod_kvexpr_ui("kv"),
       verbatimTextOutput("value")
     ),
     server = function(input, output, session) {
       r_ans <- mod_kvexpr_server(
         "kv",
-        get_value = function() list(newcol = "x + 1"),
+        get_value = function() c(newcol = "x + 1"),
         get_cols = function() c("x", "y", "z")
       )
 
