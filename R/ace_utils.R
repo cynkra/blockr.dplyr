@@ -58,19 +58,21 @@ setup_ace_editor <- function(id, value = "", height = "20px") {
     // Add custom key handler for tab
     document.addEventListener("DOMContentLoaded", function() {
       setTimeout(function() {
-        var editor = ace.edit("expr");
+        var editor = ace.edit("%s");
         editor.commands.on("afterExec", function(e) {
-          var pos = editor.getCursorPosition();
-          var line = editor.session.getLine(pos.row);
-          if (line.substring(pos.column - 2, pos.column) === "()") {
-            editor.moveCursorTo(pos.row, pos.column - 1);
+          if (e.command.name === "insertstring" || e.command.name === "Return") {
+            var pos = editor.getCursorPosition();
+            var line = editor.session.getLine(pos.row);
+            if (line.substring(pos.column - 2, pos.column) === "()") {
+              editor.moveCursorTo(pos.row, pos.column - 1);
+            }
           }
         });
       }, 100);
     });
 
     ace.require("ace/ext/language_tools").addCompleter(customCompleter);
-  ', jsonlite::toJSON(get_default_categories(), auto_unbox = TRUE))
+  ', jsonlite::toJSON(get_default_categories(), auto_unbox = TRUE), id)
 
   tagList(
     tags$style(".mutate-expression .shiny-ace {
