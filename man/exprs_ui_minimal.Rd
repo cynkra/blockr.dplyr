@@ -4,14 +4,12 @@
 \alias{exprs_ui_minimal}
 \title{Create a minimal UI element for a single expression}
 \usage{
-exprs_ui_minimal(id = "", value = NULL, auto_complete_list = NULL)
+exprs_ui_minimal(id = "", value = "")
 }
 \arguments{
 \item{id}{Character string, an identifier for the UI element}
 
 \item{value}{Default value for the expression}
-
-\item{auto_complete_list}{List of autocompletion options}
 }
 \value{
 A div element containing the UI components

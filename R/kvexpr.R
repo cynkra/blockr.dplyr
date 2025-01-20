@@ -20,7 +20,7 @@
 #' serve(new_mutate_block(), list(data = mtcars))
 #' }
 #' @export
-mod_keyvalue_server <- function(
+mod_kvexpr_server <- function(
   id,
   get_value,
   get_cols,
@@ -166,7 +166,7 @@ get_exprs <- function(prefix, input) {
 #' @param ns Namespace function
 #' @return A div containing the UI elements
 #' @export
-mod_keyvalue_ui <- function(value,
+mod_kvexpr_ui <- function(value,
                             multiple,
                             submit,
                             key,
@@ -178,7 +178,7 @@ mod_keyvalue_ui <- function(value,
 
   core_ui <- tagList(Map(
     function(name, value, id) {
-      exprs_ui(
+      kvexpr_ui(
         id,
         value_name = name,
         value_val = value,
@@ -229,14 +229,14 @@ mod_keyvalue_ui <- function(value,
 #'
 #' @examples
 #' \dontrun{
-#' run_keyvalue_example()
+#' pkgload::load_all();run_kvexpr_example()
 #' }
 #' @export
-run_keyvalue_example <- function() {
+run_kvexpr_example <- function() {
   shinyApp(
     ui = bslib::page_fluid(
       theme = bslib::bs_theme(version = 5),
-      mod_keyvalue_ui(
+      mod_kvexpr_ui(
         value = list(newcol = "x + 1"),
         multiple = FALSE,
         submit = TRUE,
@@ -245,7 +245,7 @@ run_keyvalue_example <- function() {
       )
     ),
     server = function(input, output, session) {
-      r_ans <- mod_keyvalue_server(
+      r_ans <- mod_kvexpr_server(
         "kv",
         get_value = function() list(newcol = "x + 1"),
         get_cols = function() c("x", "y", "z")

@@ -4,7 +4,13 @@
 \alias{mod_flexpr_server}
 \title{Flexible expression server module}
 \usage{
-mod_flexpr_server(id, get_value, get_cols, submit = TRUE)
+mod_flexpr_server(
+  id,
+  get_value,
+  get_cols,
+  get_cols_expr = get_cols,
+  submit = TRUE
+)
 }
 \arguments{
 \item{id}{The module ID}

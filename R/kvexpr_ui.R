@@ -37,7 +37,7 @@
 #'   }
 #' )
 #' }
-exprs_ui <- function(id = "",
+kvexpr_ui <- function(id = "",
                      value_name = "newcol",
                      value_val = NULL,
                      delete_button = TRUE,

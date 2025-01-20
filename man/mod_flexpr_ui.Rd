@@ -4,21 +4,16 @@
 \alias{mod_flexpr_ui}
 \title{Create flexible expression UI module}
 \usage{
-mod_flexpr_ui(
-  value,
-  cols = c("Sepal.Length", "Sepal.Width"),
-  submit = TRUE,
-  ns = function(x) x
-)
+mod_flexpr_ui(ns = function(x) x)
 }
 \arguments{
+\item{ns}{Namespace function}
+
 \item{value}{Initial values}
 
 \item{cols}{Available column names}
 
 \item{submit}{Whether to show submit button}
-
-\item{ns}{Namespace function}
 }
 \value{
 A div containing the UI elements
