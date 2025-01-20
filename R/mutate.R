@@ -63,20 +63,19 @@ new_mutate_block <- function(r_strings, ...) {
           list(
             expr = r_expr,
             state = list(
-              strings = r_ans,
-              choices = r_choices
+              r_strings = r_ans
             )
           )
         }
       )
     },
-    function(ns, strings = list(newcol = "1"), choices = character()) {
+    function(ns) {
       mod_keyvalue_ui(
-        value = strings,
+        value = list(newcol = ""),
         multiple = FALSE,
         submit = TRUE,
         key = "suggest",
-        auto_complete_list = list(data = choices),
+        auto_complete_list = list(data = character()),
         ns = NS(ns("expression", "kv"))
       )
     },
