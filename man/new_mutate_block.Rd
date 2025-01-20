@@ -21,7 +21,13 @@ This block allows to add new variables and preserve existing ones
 }
 \examples{
 \dontrun{
+# Basic usage with mtcars dataset
+library(blockr.core)
 serve(new_mutate_block(), list(data = mtcars))
+
+# With a custom dataset
+df <- data.frame(x = 1:5, y = letters[1:5])
+serve(new_mutate_block(), list(data = df))
 }
 }
 \seealso{

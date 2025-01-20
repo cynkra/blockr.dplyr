@@ -143,7 +143,7 @@ mod_kvexpr_ui <- function(id) {
         shinyAce::aceEditor(
           outputId = ns("pl_val"),
           debounce = 300,
-          value = "x + 1",
+          value = "",
           mode = "r",
           autoComplete = "live",
           autoCompleters = c("rlang", "static"),

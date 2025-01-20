@@ -13,7 +13,13 @@
 #' @seealso [new_transform_block()]
 #' @examples
 #' \dontrun{
+#' # Basic usage with mtcars dataset
+#' library(blockr.core)
 #' serve(new_mutate_block(), list(data = mtcars))
+#'
+#' # With a custom dataset
+#' df <- data.frame(x = 1:5, y = letters[1:5])
+#' serve(new_mutate_block(), list(data = df))
 #' }
 #' @export
 new_mutate_block <- function(r_strings, ...) {
