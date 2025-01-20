@@ -30,7 +30,14 @@ library(blockr.dplyr)
 blockr.core::serve(new_select_block(c("mpg", "cyl")), list(data = mtcars))
 ```
 
-and a two-table verb such as `dplyr::join()` is available as
+A `dplyr::mutate()` block can be used to add new variables:
+
+``` r
+library(blockr.dplyr)
+blockr.core::serve(new_mutate_block(), list(data = mtcars))
+```
+
+And a two-table verb such as `dplyr::join()` is available as
 
 ``` r
 library(blockr.dplyr)
