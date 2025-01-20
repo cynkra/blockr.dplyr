@@ -242,7 +242,8 @@ run_kvexpr_example <- function() {
         submit = TRUE,
         key = "suggest",
         ns = NS("kv")
-      )
+      ),
+      verbatimTextOutput("value")
     ),
     server = function(input, output, session) {
       r_ans <- mod_kvexpr_server(
@@ -251,8 +252,10 @@ run_kvexpr_example <- function() {
         get_cols = function() c("x", "y", "z")
       )
 
-      observe({
-        print(r_ans())
+      output$value <- renderPrint({
+        val <- r_ans()
+        cat(names(val), "\n")
+        cat(sprintf('"%s"', unname(val)))
       })
     }
   )
