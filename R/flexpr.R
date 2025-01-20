@@ -139,7 +139,7 @@ mod_flexpr_server <- function(
 mod_flexpr_ui <- function(ns = function(x) x) {
   div(
     div(
-      class = "input-group",
+      class = "input-group mb-3",
       div(
         class = "form-control p-0",
         conditionalPanel(
@@ -197,21 +197,24 @@ mod_flexpr_ui <- function(ns = function(x) x) {
       }
       .input-group .mutate-expression {
         border: none !important;
+        height: 38px;
       }
       .input-group {
-        height: 38px;
+        height: 40px;
       }
       .input-group .input-group-text {
         padding-top: 0;
         padding-bottom: 0;
-        height: 38px;
+        height: 40px;
       }
       .input-group .form-control {
-        height: 38px;
+        height: 40px;
       }
       .input-group .selectize-input {
-        min-height: 38px;
+        min-height: 30px;
         padding-top: 6px;
+        border: none !important;
+        box-shadow: none !important;
       }
     ")
   )
