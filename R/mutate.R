@@ -39,22 +39,24 @@ new_mutate_block <- function(r_strings, ...) {
           )
 
           # Store the validated expression
-          r_validated <- reactiveVal()
+          r_validated <- reactiveVal(parse_mutate())
 
           # Validate and update on submit
           observeEvent(input$submit, {
             strings <- r_ans()
+
+            # If empty or only whitespace, return simple mutate
+            if (all(trimws(unname(strings)) == "")) {
+              expr <- parse_mutate(strings)
+              r_validated(expr)
+              return()
+            }
+
             req(strings)
             stopifnot(is.character(strings), !is.null(names(strings)))
 
             mutate_string <- glue::glue("{names(strings)} = {unname(strings)}")
-
-            expr <- parse(text = glue::glue(
-              "dplyr::mutate(
-                data,
-                {mutate_string}
-              )"
-            ))[1]
+            expr <- parse_mutate(mutate_string)
 
             # Validation
             data <- data()
@@ -98,3 +100,12 @@ new_mutate_block <- function(r_strings, ...) {
   )
 }
 # serve(new_mutate_block(), list(data = mtcars))
+
+parse_mutate <- function(mutate_string = "") {
+  text <- if (identical(mutate_string, "")) {
+    "dplyr::mutate(data)"
+  } else {
+    glue::glue("dplyr::mutate(data, {mutate_string})")
+  }
+  parse(text = text)[1]
+}
