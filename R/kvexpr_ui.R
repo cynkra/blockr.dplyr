@@ -8,8 +8,6 @@
 #' @param id Character string, an identifier for the UI element
 #' @param value_name Default name for the new column
 #' @param value_val Default value for the new column
-#' @param delete_button Should a delete button be shown?
-#' @param key How to display the 'key' field: "suggest", "empty", or "none"
 #' @param auto_complete_list List of autocompletion options, passed to
 #'   shinyAce::aceEditor()
 #' @return A `div` element containing the UI components
@@ -19,32 +17,12 @@
 #' @export
 #' @examples
 #' \dontrun{
-#' library(shiny)
-#' library(shinyAce)
-#' library(bslib)
-#' shinyApp(
-#'   ui = bslib::page_fluid(
-#'     theme = bslib::bs_theme(version = 5),
-#'     exprs_ui(
-#'       id = "myid",
-#'       value_name = "newcol",
-#'       value_val = "x + 1",
-#'       delete_button = TRUE
-#'     )
-#'   ),
-#'   server = function(input, output, session) {
-#'     shinyAce::aceAutocomplete("myid_val")
-#'   }
-#' )
+#' pkgload::load_all(); run_kvexpr_ui_example()
 #' }
 kvexpr_ui <- function(id = "",
                      value_name = "newcol",
                      value_val = NULL,
-                     delete_button = TRUE,
-                     key = c("suggest", "empty", "none"),
                      auto_complete_list = NULL) {
-  key <- match.arg(key)
-
   tagList(
     tags$style(".mutate-expression .shiny-ace {
       border: none;
@@ -59,44 +37,43 @@ kvexpr_ui <- function(id = "",
       width: 62%;
     }
 
-    .mutate-expression .mutate-delete:hover {
-      color: var(--bs-white);
-      border-color: var(--bs-danger);
-      background: var(--bs-danger);
+    .mutate-expression .mutate-equal {
+      background-color: #e9ecef;
+      border-color: #dee2e6;
+    }
+
+    .mutate-expression {
+      border: 1px solid #dee2e6;
     }"),
     div(
       id = id,
       class = paste(
         "input-group d-flex justify-content-between mt-1 mb-3",
-        "mutate-expression border border-dark-subtle rounded"
+        "mutate-expression border rounded"
       ),
-      if (key != "none") {
-        div(
-          class = "mutate-column",
-          shinyAce::aceEditor(
-            outputId = paste0(id, "_name"),
-            # Update may be delayed when clicking submit
-            debounce = 300,
-            value = value_name,
-            mode = "r",
-            autoComplete = "disabled",
-            height = "20px",
-            showPrintMargin = FALSE,
-            highlightActiveLine = FALSE,
-            tabSize = 2,
-            theme = "tomorrow",
-            maxLines = 1,
-            fontSize = 14,
-            showLineNumbers = FALSE
-          )
+      div(
+        class = "mutate-column",
+        shinyAce::aceEditor(
+          outputId = paste0(id, "_name"),
+          # Update may be delayed when clicking submit
+          debounce = 300,
+          value = value_name,
+          mode = "r",
+          autoComplete = "disabled",
+          height = "20px",
+          showPrintMargin = FALSE,
+          highlightActiveLine = FALSE,
+          tabSize = 2,
+          theme = "tomorrow",
+          maxLines = 1,
+          fontSize = 14,
+          showLineNumbers = FALSE
         )
-      },
-      if (key != "none") {
-        div(
-          class = "input-group-text mutate-equal",
-          icon("equals")
-        )
-      },
+      ),
+      div(
+        class = "input-group-text mutate-equal",
+        icon("equals")
+      ),
       div(
         class = "mutate-code",
         shinyAce::aceEditor(
@@ -116,15 +93,33 @@ kvexpr_ui <- function(id = "",
           fontSize = 14,
           showLineNumbers = FALSE
         )
-      ),
-      if (delete_button) {
-        tags$button(
-          id = paste0(id, "_rm"),
-          type = "button",
-          class = "btn btn-default action-button mutate-delete",
-          icon("trash-can")
-        )
-      }
+      )
     )
+  )
+}
+
+#' Run example app demonstrating the UI component
+#'
+#' This function launches a Shiny app that demonstrates the basic UI
+#' functionality with a simple example.
+#'
+#' @examples
+#' \dontrun{
+#' pkgload::load_all(); run_kvexpr_ui_example()
+#' }
+#' @export
+run_kvexpr_ui_example <- function() {
+  shinyApp(
+    ui = bslib::page_fluid(
+      theme = bslib::bs_theme(version = 5),
+      kvexpr_ui(
+        id = "myid",
+        value_name = "newcol",
+        value_val = "x + 1"
+      )
+    ),
+    server = function(input, output, session) {
+      shinyAce::aceAutocomplete("myid_val")
+    }
   )
 }

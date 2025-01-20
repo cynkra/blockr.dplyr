@@ -6,10 +6,9 @@
 #' @param id The module ID
 #' @param get_value Function that returns initial values
 #' @param get_cols Function that returns column names for autocompletion
-#' @param submit Whether to show a submit button (defaults to TRUE)
 #' @param multiple Whether multiple key-value pairs are allowed
 #'   (defaults to TRUE)
-#' @param key The key display mode: "suggest", "empty", or "none"
+#' @param key The key display mode: "suggest" or "empty"
 #'
 #' @return A reactive expression containing the current key-value pairs
 #' @importFrom shiny req showNotification NS moduleServer reactive
@@ -24,10 +23,11 @@ mod_kvexpr_server <- function(
   id,
   get_value,
   get_cols,
-  submit = TRUE,
   multiple = TRUE,
-  key = "suggest"
+  key = c("suggest", "empty")
 ) {
+  key <- match.arg(key)
+
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
 
@@ -113,12 +113,8 @@ mod_kvexpr_server <- function(
     }) |>
       bindEvent(r_value_user(), ignoreInit = TRUE)
 
-    # Return value based on submit mode
-    if (submit) {
-      reactive(r_value()) |> bindEvent(input$i_submit)
-    } else {
-      reactive(r_value())
-    }
+    # Return reactive value
+    reactive(r_value())
   })
 }
 
@@ -159,19 +155,17 @@ get_exprs <- function(prefix, input) {
 #' Create key-value UI module
 #'
 #' @param value Initial values
-#' @param multiple Whether multiple key-value pairs are allowed
-#' @param submit Whether to show submit button
-#' @param key Key display mode
+#' @param key Key display mode: "suggest" or "empty"
 #' @param auto_complete_list List of autocomplete options
 #' @param ns Namespace function
 #' @return A div containing the UI elements
 #' @export
 mod_kvexpr_ui <- function(value,
-                            multiple,
-                            submit,
-                            key,
-                            auto_complete_list = NULL,
-                            ns = function(x) x) {
+                         key = c("suggest", "empty"),
+                         auto_complete_list = NULL,
+                         ns = function(x) x) {
+  key <- match.arg(key)
+
   names <- names(value)
   values <- unname(value)
   ids <- ns(paste0("pl_", seq(value)))
@@ -182,7 +176,6 @@ mod_kvexpr_ui <- function(value,
         id,
         value_name = name,
         value_val = value,
-        delete_button = multiple,
         key = key,
         auto_complete_list = auto_complete_list
       )
@@ -193,32 +186,8 @@ mod_kvexpr_ui <- function(value,
   ))
 
   div(
-    div(
-      id = ns("pls"),
-      core_ui
-    ),
-    div(
-      class = "w-100 d-flex justify-content-end",
-      div(
-        class = "m-0 mb-5",
-        if (multiple) {
-          actionButton(
-            ns("i_add"),
-            label = NULL,
-            icon = icon("plus"),
-            class = "btn btn-success"
-          )
-        },
-        if (submit) {
-          actionButton(
-            ns("i_submit"),
-            label = "Submit",
-            icon = icon("paper-plane"),
-            class = "btn btn-primary"
-          )
-        }
-      )
-    )
+    id = ns("pls"),
+    core_ui
   )
 }
 
@@ -238,8 +207,6 @@ run_kvexpr_example <- function() {
       theme = bslib::bs_theme(version = 5),
       mod_kvexpr_ui(
         value = list(newcol = "x + 1"),
-        multiple = FALSE,
-        submit = TRUE,
         key = "suggest",
         ns = NS("kv")
       ),
@@ -249,7 +216,8 @@ run_kvexpr_example <- function() {
       r_ans <- mod_kvexpr_server(
         "kv",
         get_value = function() list(newcol = "x + 1"),
-        get_cols = function() c("x", "y", "z")
+        get_cols = function() c("x", "y", "z"),
+        key = "suggest"
       )
 
       output$value <- renderPrint({
