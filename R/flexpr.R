@@ -138,17 +138,50 @@ mod_flexpr_server <- function(
 #' @export
 mod_flexpr_ui <- function(ns = function(x) x) {
   div(
+    div(
+      class = "input-group",
+      div(
+        class = "form-control p-0",
+        conditionalPanel(
+          condition = sprintf("input['%s'] == false", ns("use_expr")),
+          selectInput(
+            ns("select"),
+            label = NULL,
+            choices = NULL,
+            multiple = TRUE,
+            selected = NULL,
+            width = "100%"
+          )
+        ),
+        conditionalPanel(
+          condition = sprintf("input['%s'] == true", ns("use_expr")),
+          setup_ace_editor(
+            ns("expr"),
+            height = "20px"
+          )
+        )
+      ),
+      div(
+        class = "input-group-text",
+        div(
+          class = "mode-toggle form-check form-switch m-0 p-0",
+          icon("code"),
+          tags$input(
+            class = "form-check-input",
+            type = "checkbox",
+            id = ns("use_expr"),
+            role = "switch",
+            `data-bs-toggle` = "tooltip",
+            `data-bs-placement` = "left",
+            title = "Toggle between selection mode (off) and expression mode (on)"
+          )
+        )
+      )
+    ),
+
     # Add custom CSS
     tags$style("
-      .input-wrapper {
-        position: relative;
-      }
       .mode-toggle {
-        position: absolute;
-        right: 10px;
-        top: 50%;
-        transform: translateY(-50%);
-        z-index: 100;
         display: flex;
         align-items: center;
         gap: 0.5rem;
@@ -162,53 +195,25 @@ mod_flexpr_ui <- function(ns = function(x) x) {
         color: var(--bs-gray-600);
         font-size: 0.9em;
       }
-    "),
-
-    div(
-      class = "input-wrapper",
-      div(
-        class = "flex-grow-1",
-        style = "min-width: 0;",  # prevents flex item from overflowing
-        conditionalPanel(
-          condition = sprintf("input['%s'] == false", ns("use_expr")),
-          div(
-            class = "w-100",
-            selectInput(
-              ns("select"),
-              label = NULL,
-              choices = NULL,
-              multiple = TRUE,
-              selected = NULL,
-              width = "100%"
-            )
-          )
-        ),
-        conditionalPanel(
-          condition = sprintf("input['%s'] == true", ns("use_expr")),
-          div(
-            class = "w-100",
-            setup_ace_editor(
-              ns("expr"),
-              height = "20px"
-            )
-          )
-        )
-      ),
-      # Toggle switch with icon
-      div(
-        class = "mode-toggle form-check form-switch",
-        icon("code"),
-        tags$input(
-          class = "form-check-input",
-          type = "checkbox",
-          id = ns("use_expr"),
-          role = "switch",
-          `data-bs-toggle` = "tooltip",
-          `data-bs-placement` = "left",
-          title = "Toggle between selection mode (off) and expression mode (on)"
-        )
-      )
-    )
+      .input-group .mutate-expression {
+        border: none !important;
+      }
+      .input-group {
+        height: 38px;
+      }
+      .input-group .input-group-text {
+        padding-top: 0;
+        padding-bottom: 0;
+        height: 38px;
+      }
+      .input-group .form-control {
+        height: 38px;
+      }
+      .input-group .selectize-input {
+        min-height: 38px;
+        padding-top: 6px;
+      }
+    ")
   )
 }
 
