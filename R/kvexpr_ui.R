@@ -26,7 +26,7 @@ kvexpr_ui <- function(id = "",
   tagList(
     tags$style(".mutate-expression .shiny-ace {
       border: none;
-      margin: 1rem;
+      margin: 0.75rem;
     }
 
     .mutate-expression .mutate-column {
@@ -34,12 +34,15 @@ kvexpr_ui <- function(id = "",
     }
 
     .mutate-expression .mutate-code {
-      width: 62%;
+      flex: 1;
+      margin-left: 0;
     }
 
     .mutate-expression .mutate-equal {
       background-color: #e9ecef;
       border-color: #dee2e6;
+      padding-left: 0.75rem;
+      padding-right: 0.75rem;
     }
 
     .mutate-expression {

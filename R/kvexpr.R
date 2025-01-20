@@ -175,9 +175,7 @@ mod_kvexpr_ui <- function(value,
       kvexpr_ui(
         id,
         value_name = name,
-        value_val = value,
-        key = key,
-        auto_complete_list = auto_complete_list
+        value_val = value
       )
     },
     name = names,
@@ -207,7 +205,6 @@ run_kvexpr_example <- function() {
       theme = bslib::bs_theme(version = 5),
       mod_kvexpr_ui(
         value = list(newcol = "x + 1"),
-        key = "suggest",
         ns = NS("kv")
       ),
       verbatimTextOutput("value")
