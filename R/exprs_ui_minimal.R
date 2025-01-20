@@ -18,8 +18,8 @@ exprs_ui_minimal <- function(
   custom_completer <- sprintf('
     var customCompleter = {
       getCompletions: function(editor, session, pos, prefix, callback) {
-        // Define categories and their functions
-        var categories = {
+        // Categories will be updated dynamically from the server
+        var categories = window.aceCategories || {
           arithmetic: ["abs", "sign", "ceiling", "floor", "round", "trunc",
                       "log", "log2", "log10", "exp", "sqrt"],
           aggregate: ["mean", "sum", "min", "max"],
@@ -32,25 +32,38 @@ exprs_ui_minimal <- function(
         var wordList = [];
         Object.keys(categories).forEach(function(category) {
           categories[category].forEach(function(fn) {
+            var isColumn = category === "column";
             wordList.push({
               caption: fn,
-              snippet: fn + "()",
-              value: fn,
-              score: 1000,
-              meta: category
+              value: fn + (isColumn ? "" : "()"),
+              meta: category,
+              score: isColumn ? 1001 : 1000  // Columns appear first
             });
           });
         });
 
-        // Sort by category and then by function name
+        // Sort by score (columns first), then category, then name
         wordList.sort(function(a, b) {
-          if (a.meta === b.meta) {
-            return a.caption.localeCompare(b.caption);
-          }
+          if (a.score !== b.score) return b.score - a.score;
+          if (a.meta === b.meta) return a.caption.localeCompare(b.caption);
           return a.meta.localeCompare(b.meta);
         });
         callback(null, wordList);
+      },
+
+      insertMatch: function(editor, data) {
+        if (data.isColumn) {
+          editor.insert(data.value);
+        } else {
+          editor.insert(data.caption + "()");
+          editor.navigateLeft(1);
+        }
       }
+    };
+
+    // Function to update categories from server
+    window.updateAceCategories = function(newCategories) {
+      window.aceCategories = newCategories;
     };
 
     // Add custom key handler for tab
@@ -58,13 +71,10 @@ exprs_ui_minimal <- function(
       setTimeout(function() {
         var editor = ace.edit("expr");
         editor.commands.on("afterExec", function(e) {
-          if (e.command.name == "insertstring" || e.command.name == "insertMatch") {
-            var pos = editor.getCursorPosition();
-            var line = editor.session.getLine(pos.row);
-            var prefix = line.substring(0, pos.column);
-            if (prefix.match(/\\w+\\($/)) {
-              editor.moveCursorTo(pos.row, pos.column - 1);
-            }
+          var pos = editor.getCursorPosition();
+          var line = editor.session.getLine(pos.row);
+          if (line.substring(pos.column - 2, pos.column) === "()") {
+            editor.moveCursorTo(pos.row, pos.column - 1);
           }
         });
       }, 100);
@@ -123,7 +133,11 @@ exprs_ui_minimal <- function(
 #' }
 #' @export
 run_minimal_example <- function() {
-  df <- data.frame(x = 1:10, y = 11:20, z = 21:30)
+  df <- data.frame(
+    Sepal.Length = rnorm(10),
+    Sepal.Width = rnorm(10),
+    Species = sample(c("setosa", "versicolor"), 10, replace = TRUE)
+  )
 
   shinyApp(
     ui = bslib::page_fluid(
@@ -141,6 +155,23 @@ run_minimal_example <- function() {
     server = function(input, output, session) {
       # Initialize ace editor
       observe({
+        # Update categories with current column names
+        categories <- list(
+          arithmetic = c("abs", "sign", "ceiling", "floor", "round", "trunc",
+                        "log", "log2", "log10", "exp", "sqrt"),
+          aggregate = c("mean", "sum", "min", "max"),
+          offset = c("lead", "lag", "cumsum", "cumprod", "cummin", "cummax"),
+          logical = c("if_else", "case_when"),
+          string = c("str_c", "paste", "paste0", "str_sub", "str_to_lower", "str_to_upper"),
+          ranking = c("row_number", "min_rank", "dense_rank", "percent_rank", "ntile"),
+          column = colnames(df)  # Add column names as a category
+        )
+
+        # Convert to JSON and update in JavaScript
+        js <- sprintf("window.updateAceCategories(%s);", jsonlite::toJSON(categories))
+        shinyjs::runjs(js)
+
+        # Initialize editor options
         shinyjs::runjs("
           if (typeof ace !== 'undefined') {
             var editor = ace.edit('expr');
