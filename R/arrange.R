@@ -11,9 +11,9 @@
 new_arrange_block <- function(columns = character(), desc = FALSE, ...) {
 
   new_transform_block(
-    function(data) {
+    function(id, data) {
       moduleServer(
-        "expression",
+        id,
         function(input, output, session) {
 
           sels <- reactiveVal(columns)
@@ -57,16 +57,16 @@ new_arrange_block <- function(columns = character(), desc = FALSE, ...) {
         }
       )
     },
-    function(ns) {
+    function(id) {
       tagList(
         selectInput(
-          ns("expression", "columns"),
+          NS(id, "columns"),
           label = "Arrange by:",
           choices = NULL,
           multiple = TRUE
         ),
         checkboxInput(
-          ns("expression", "desc"),
+          NS(id, "desc"),
           label = "Descending order",
           value = FALSE
         )

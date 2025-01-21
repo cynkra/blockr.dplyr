@@ -26,9 +26,9 @@ new_join_block <- function(type = character(), by = character(), ...) {
   }
 
   new_transform_block(
-    function(x, y) {
+    function(id, x, y) {
       moduleServer(
-        "expression",
+        id,
         function(input, output, session) {
 
           sels <- reactiveVal(by)
@@ -45,6 +45,15 @@ new_join_block <- function(type = character(), by = character(), ...) {
               inputId = "by",
               choices = cols(),
               selected = sels()
+            )
+          )
+
+          observe(
+            updateSelectInput(
+              session,
+              inputId = "type",
+              choices = join_types,
+              selected = type()
             )
           )
 
@@ -71,16 +80,15 @@ new_join_block <- function(type = character(), by = character(), ...) {
         }
       )
     },
-    function(ns) {
+    function(id) {
       tagList(
         selectInput(
-          inputId = ns("expression", "type"),
+          inputId = NS(id, "type"),
           label = "Join type",
-          choices = join_types,
-          selected = type
+          choices = list()
         ),
         selectInput(
-          inputId = ns("expression", "by"),
+          inputId = NS(id, "by"),
           label = "By columns",
           choices = list(),
           multiple = TRUE
