@@ -3,19 +3,23 @@ register_dplyr_blocks <- function() {
     c(
       "new_select_block",
       "new_join_block",
-      "new_arrange_block"
+      "new_arrange_block",
+      "new_mutate_block"
     ),
     name = c(
       "select block",
       "join block",
-      "arrange block"
+      "arrange block",
+      "mutate block"
     ),
     description = c(
       "Subset columns in a data.frame",
       "Join together two data.frames",
-      "Order to the rows of a data.frame"
+      "Order to the rows of a data.frame",
+      "Add or modify columns in a data.frame"
     ),
     category = c(
+      "transform",
       "transform",
       "transform",
       "transform"
