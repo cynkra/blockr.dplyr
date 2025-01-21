@@ -4,10 +4,10 @@
 \alias{new_mutate_block}
 \title{Mutate block constructor}
 \usage{
-new_mutate_block(r_strings, ...)
+new_mutate_block(string = c(newcol = "paste('type', 'here')"), ...)
 }
 \arguments{
-\item{r_strings}{Reactive expression returning character vector of
+\item{string}{Reactive expression returning character vector of
 expressions}
 
 \item{...}{Additional arguments forwarded to \code{\link[=new_block]{new_block()}}}
