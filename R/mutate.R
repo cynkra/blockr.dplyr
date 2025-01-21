@@ -98,6 +98,7 @@ new_mutate_block <- function(string = character(), ...) {
     },
     function(ns) {
       div(
+        class = "m-3",
         mod_kvexpr_ui(ns("expression", "kv")),
         div(
           style = "text-align: right; margin-top: 10px;",
