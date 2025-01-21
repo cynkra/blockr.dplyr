@@ -109,10 +109,14 @@ mod_kvexpr_ui <- function(id) {
         border: none !important;
       }
 
+      .input-group.mutate-expression {
+        height: 38px !important;
+      }
+
      .input-group .input-group-text {
         padding-top: 0;
         padding-bottom: 0;
-        height: 30px;
+        height: 36px;
       }
 
     "),
