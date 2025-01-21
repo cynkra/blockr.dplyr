@@ -15,7 +15,7 @@ get_default_categories <- function() {
 #' Setup Ace editor with custom completer
 #'
 #' @param id The editor ID
-#' @param value Initial value
+#' @param value Initial value (default: "")
 #' @return A tagList containing the editor setup
 #' @noRd
 setup_ace_editor <- function(id, value = "") {
@@ -105,7 +105,8 @@ setup_ace_editor <- function(id, value = "") {
           theme = "tomorrow",
           maxLines = 1,
           fontSize = 14,
-          showLineNumbers = FALSE
+          showLineNumbers = FALSE,
+          placeholder = "type, e.g., log(col1), or paste(col1, col2)"
         )
       )
     )

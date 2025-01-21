@@ -22,24 +22,25 @@
 #' serve(new_mutate_block(), list(data = df))
 #' }
 #' @export
-new_mutate_block <- function(string = character(), ...) {
+new_mutate_block <- function(string = c(newcol = "paste('type', 'here')"), ...) {
   new_transform_block(
     function(data) {
       moduleServer(
         "expression",
         function(input, output, session) {
-          r_choices <- reactive({
-            colnames(data())
-          })
 
           r_string <- mod_kvexpr_server(
             id = "kv",
-            get_value = \() c(newcol = 'paste("my", "expression")'),
+            get_value = \() string,
             get_cols = \() colnames(data())
           )
 
           # Store the validated expression
-          r_expr_validated <- reactiveVal(parse_mutate())
+          r_expr_validated <- reactiveVal(NULL)
+          observe({
+            r_string_validated <- reactiveVal("")
+            r_expr_validated(parse_mutate())
+          })
           r_string_validated <- reactiveVal(string)
 
           # Validate and update on submit
@@ -118,7 +119,8 @@ new_mutate_block <- function(string = character(), ...) {
 # serve(new_mutate_block(), list(data = mtcars))
 
 parse_mutate <- function(mutate_string = "") {
-  text <- if (identical(mutate_string, "")) {
+  print(mutate_string)
+  text <- if (identical(unname(mutate_string), "")) {
     "dplyr::mutate(data)"
   } else {
     glue::glue("dplyr::mutate(data, {mutate_string})")
