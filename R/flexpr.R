@@ -36,7 +36,6 @@ expr_to_cols <- function(expr, cols) {
 #' @param get_value Function that returns initial values
 #' @param get_choices Function that returns column names for autocompletion
 #' @param get_choices_expr Function that returns column names for expression autocompletion (defaults to get_choices)
-#' @param submit Whether to show a submit button (defaults to TRUE)
 #'
 #' @return A reactive expression containing the current expressions
 #' @importFrom shiny req showNotification NS moduleServer reactive updateSelectInput
@@ -50,8 +49,7 @@ mod_flexpr_server <- function(
   id,
   get_value,
   get_choices,
-  get_choices_expr = get_choices,
-  submit = TRUE
+  get_choices_expr = get_choices
 ) {
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
