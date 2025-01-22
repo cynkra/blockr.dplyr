@@ -126,7 +126,7 @@ mod_flexpr_server <- function(
 
 #' Create flexible expression UI module
 #'
-#' @param ns Namespace function
+#' @param id The module ID
 #'
 #' @return A div containing the UI elements
 #' @importFrom shiny NS actionButton icon div selectInput checkboxInput
