@@ -112,14 +112,15 @@ new_join_block <- function(type = character(), by = character(), ...) {
       )
     },
     function(ns) {
-      tagList(
+      div(
+        class = "m-3",
         selectInput(
           inputId = ns("expression", "type"),
           label = "Join type",
           choices = join_types,
           selected = type
         ),
-        mod_flexpr_ui(ns = NS(ns("expression", "flexpr")))
+        mod_flexpr_ui(id = ns("expression", "flexpr"))
       )
     },
     dat_valid = function(x, y) {

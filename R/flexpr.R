@@ -227,25 +227,20 @@ mod_flexpr_ui <- function(id) {
 #' }
 #' @export
 run_flexpr_example <- function() {
-
   shinyApp(
     ui = bslib::page_fluid(
       theme = bslib::bs_theme(version = 5),
       shinyjs::useShinyjs(),
-      div(
-        class = "mt-3",
-        mod_flexpr_ui("flexpr"),
-        verbatimTextOutput("value")
-      )
+      mod_flexpr_ui("flexpr"),
+      verbatimTextOutput("value")
     ),
     server = function(input, output, session) {
       r_ans <- mod_flexpr_server(
         "flexpr",
-        get_value = function() "choice1, choice2",
+        get_value = function() "choice1 == choice2",
         get_choices = function() c("choice1", "choice2"),
         get_choices_expr = function() c("choice1", "choice2", "choice3")
       )
-
       output$value <- renderPrint({
         r_ans()
       })
