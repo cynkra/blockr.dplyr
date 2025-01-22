@@ -4,24 +4,16 @@
 \alias{mod_flexpr_server}
 \title{Flexible expression server module}
 \usage{
-mod_flexpr_server(
-  id,
-  get_value,
-  get_cols,
-  get_cols_expr = get_cols,
-  submit = TRUE
-)
+mod_flexpr_server(id, get_value, get_choices, get_choices_expr = get_choices)
 }
 \arguments{
 \item{id}{The module ID}
 
 \item{get_value}{Function that returns initial values}
 
-\item{get_cols}{Function that returns column names for autocompletion}
+\item{get_choices}{Function that returns column names for autocompletion}
 
-\item{get_cols_expr}{Function that returns column names for expression autocompletion (defaults to get_cols)}
-
-\item{submit}{Whether to show a submit button (defaults to TRUE)}
+\item{get_choices_expr}{Function that returns column names for expression autocompletion (defaults to get_choices)}
 }
 \value{
 A reactive expression containing the current expressions
