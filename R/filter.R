@@ -28,9 +28,8 @@ new_filter_block <- function(string = "TRUE", ...) {
       moduleServer(
         id,
         function(input, output, session) {
-
-          r_string <- mod_flexpr_server(
-            id = "filter",
+          r_string <- mod_kvexpr_server(
+            id = "kv",
             get_value = \() string,
             get_cols = \() colnames(data())
           )
@@ -47,16 +46,17 @@ new_filter_block <- function(string = "TRUE", ...) {
           observeEvent(input$submit, {
             string <- r_string()
 
-            # If empty or only whitespace, return simple filter
-            if (all(trimws(string) == "")) {
-              expr <- parse_filter(string)
+            # If empty or only whitespace, return simple mutate
+            if (all(trimws(unname(string)) == "")) {
+              expr <- parse_mutate(string)
               r_expr_validated(expr)
               return()
             }
 
             req(string)
-            stopifnot(is.character(string))
+            stopifnot(is.character(string), !is.null(names(string)))
 
+            filter_string <- glue::glue("{string}")
             expr <- try(parse_filter(string))
             # Validation
             if (inherits(expr, "try-error")) {
@@ -99,7 +99,7 @@ new_filter_block <- function(string = "TRUE", ...) {
     function(id) {
       div(
         class = "m-3",
-        mod_flexpr_ui(NS(id, "filter")),
+        mod_kvexpr_ui(NS(id, "kv")),
         div(
           style = "text-align: right; margin-top: 10px;",
           actionButton(
@@ -118,10 +118,10 @@ new_filter_block <- function(string = "TRUE", ...) {
 
 parse_filter <- function(filter_string = "") {
   print(filter_string)
-  text <- if (identical(filter_string, "")) {
+  text <- if (identical(unname(filter_string), "")) {
     "dplyr::filter(data)"
   } else {
     glue::glue("dplyr::filter(data, {filter_string})")
   }
   parse(text = text)[1]
-} 
+}
