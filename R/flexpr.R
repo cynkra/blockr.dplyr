@@ -34,8 +34,8 @@ expr_to_cols <- function(expr, cols) {
 #'
 #' @param id The module ID
 #' @param get_value Function that returns initial values
-#' @param get_cols Function that returns column names for autocompletion
-#' @param get_cols_expr Function that returns column names for expression autocompletion (defaults to get_cols)
+#' @param get_choices Function that returns column names for autocompletion
+#' @param get_choices_expr Function that returns column names for expression autocompletion (defaults to get_choices)
 #' @param submit Whether to show a submit button (defaults to TRUE)
 #'
 #' @return A reactive expression containing the current expressions
@@ -49,8 +49,8 @@ expr_to_cols <- function(expr, cols) {
 mod_flexpr_server <- function(
   id,
   get_value,
-  get_cols,
-  get_cols_expr = get_cols,
+  get_choices,
+  get_choices_expr = get_choices,
   submit = TRUE
 ) {
   moduleServer(id, function(input, output, session) {
@@ -58,7 +58,7 @@ mod_flexpr_server <- function(
 
     # Initialize ace editor with custom completions
     observe({
-      initialize_ace_editor(session, ns("expr"), get_cols_expr())
+      initialize_ace_editor(session, ns("expr"), get_choices_expr())
     })
 
     # Initialize reactive values
@@ -74,7 +74,7 @@ mod_flexpr_server <- function(
 
     # Set initial mode based on value format
     observe({
-      initial_mode <- !is.null(expr_to_cols(get_value(), get_cols()))
+      initial_mode <- !is.null(expr_to_cols(get_value(), get_choices()))
       updateCheckboxInput(session, "use_expr", value = !initial_mode)
     })
 
@@ -92,12 +92,12 @@ mod_flexpr_server <- function(
     # Update select input when switching to select mode
     observeEvent(input$use_expr, {
       if (!isTruthy(input$use_expr)) {
-        selected <- expr_to_cols(r_value(), get_cols())
+        selected <- expr_to_cols(r_value(), get_choices())
         if (!is.null(selected)) {
           updateSelectInput(
             session,
             "select",
-            choices = get_cols(),
+            choices = get_choices(),
             selected = selected
           )
         }
@@ -226,7 +226,6 @@ mod_flexpr_ui <- function(ns = function(x) x) {
 #' }
 #' @export
 run_flexpr_example <- function() {
-  df <- data.frame(x = 1:10, y = 11:20, z = 21:30)
 
   shinyApp(
     ui = bslib::page_fluid(
@@ -241,8 +240,9 @@ run_flexpr_example <- function() {
     server = function(input, output, session) {
       r_ans <- mod_flexpr_server(
         "flexpr",
-        get_value = function() "x, y",
-        get_cols = function() colnames(df)
+        get_value = function() "choice1, choice2",
+        get_choices = function() c("choice1", "choice2"),
+        get_choices_expr = function() c("choice1", "choice2", "choice3")
       )
 
       output$value <- renderPrint({
