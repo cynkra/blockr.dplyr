@@ -50,8 +50,5 @@ And a two-table verb such as `dplyr::join()` is available as
 
 ```{r join, eval = FALSE}
 library(blockr.dplyr)
-blockr.core::serve(
-  new_join_block(by = "name"),
-  data = list(x = dplyr::band_members, y = dplyr::band_instruments)
-)
+pkgload::load_all(); blockr.core::serve(new_join_block(by = "name"), data = list(x = dplyr::band_members, y = dplyr::band_instruments))
 ```
