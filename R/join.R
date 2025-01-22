@@ -26,13 +26,22 @@ new_join_block <- function(type = character(), by = character(), ...) {
   }
 
   new_transform_block(
-    function(x, y) {
+    function(id, x, y) {
       moduleServer(
-        "expression",
+        id,
         function(input, output, session) {
 
           r_by <- reactiveVal(by)
           r_type <- reactiveVal(type)
+
+          observe(
+            updateSelectInput(
+              session,
+              inputId = "type",
+              choices = join_types,
+              selected = type
+            )
+          )
 
           observeEvent(input$type, r_type(input$type))
 
@@ -55,6 +64,7 @@ new_join_block <- function(type = character(), by = character(), ...) {
           r_expr <- reactive({
             by_string <- r_by_string()
             req(by_string)
+            req(r_type())
 
             by_expr <- try(parse(text = by_string)[[1]])
             if (inherits(by_expr, "try-error")) {
@@ -111,16 +121,15 @@ new_join_block <- function(type = character(), by = character(), ...) {
         }
       )
     },
-    function(ns) {
+    function(id) {
       div(
         class = "m-3",
         selectInput(
-          inputId = ns("expression", "type"),
+          inputId = NS(id, "type"),
           label = "Join type",
-          choices = join_types,
-          selected = type
+          choices = list()
         ),
-        mod_flexpr_ui(id = ns("expression", "flexpr"))
+        mod_flexpr_ui(id = NS(id, "flexpr"))
       )
     },
     dat_valid = function(x, y) {

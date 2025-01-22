@@ -24,9 +24,9 @@
 #' @export
 new_mutate_block <- function(string = c(newcol = "paste('type', 'here')"), ...) {
   new_transform_block(
-    function(data) {
+    function(id, data) {
       moduleServer(
-        "expression",
+        id,
         function(input, output, session) {
 
           r_string <- mod_kvexpr_server(
@@ -97,14 +97,14 @@ new_mutate_block <- function(string = c(newcol = "paste('type', 'here')"), ...) 
         }
       )
     },
-    function(ns) {
+    function(id) {
       div(
         class = "m-3",
-        mod_kvexpr_ui(ns("expression", "kv")),
+        mod_kvexpr_ui(NS(id, "kv")),
         div(
           style = "text-align: right; margin-top: 10px;",
           actionButton(
-            ns("expression", "submit"),
+            NS(id, "submit"),
             "Submit",
             icon = icon("paper-plane"),
             class = "btn-primary"

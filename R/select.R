@@ -10,28 +10,17 @@
 new_select_block <- function(columns = character(), ...) {
 
   new_transform_block(
-    function(data) {
+    function(id, data) {
       moduleServer(
-        "expression",
+        id,
         function(input, output, session) {
 
           sels <- reactiveVal(columns)
-          cols <- reactive(
-            {
-              colnames(data())
-            }
-          )
-
-          observeEvent(
-            input$columns,
-            {
-              sels(input$columns)
-            }
-          )
+          cols <- reactive(colnames(data()))
 
           observe(
             {
-              sels(intersect(sels(), cols()))
+              sels(intersect(input$columns, cols()))
 
               updateSelectInput(
                 session,
@@ -57,9 +46,9 @@ new_select_block <- function(columns = character(), ...) {
         }
       )
     },
-    function(ns) {
+    function(id) {
       selectInput(
-        inputId = ns("expression", "columns"),
+        inputId = NS(id, "columns"),
         label = "Columns",
         choices = list(),
         multiple = TRUE
