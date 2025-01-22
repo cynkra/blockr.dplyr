@@ -132,7 +132,10 @@ mod_flexpr_server <- function(
 #' @importFrom shiny NS actionButton icon div selectInput checkboxInput
 #' @importFrom htmltools tagList tags
 #' @export
-mod_flexpr_ui <- function(ns = function(x) x) {
+mod_flexpr_ui <- function(id) {
+
+  ns <- NS(id)
+
   div(
     div(
       class = "input-group mb-3",
@@ -230,8 +233,8 @@ run_flexpr_example <- function() {
       theme = bslib::bs_theme(version = 5),
       shinyjs::useShinyjs(),
       div(
-        class = "container mt-3",
-        mod_flexpr_ui(ns = NS("flexpr")),
+        class = "mt-3",
+        mod_flexpr_ui("flexpr"),
         verbatimTextOutput("value")
       )
     ),
