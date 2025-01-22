@@ -28,8 +28,8 @@ new_filter_block <- function(string = "TRUE", ...) {
       moduleServer(
         id,
         function(input, output, session) {
-          r_string <- mod_kvexpr_server(
-            id = "kv",
+          r_string <- mod_vexpr_server(
+            id = "v",
             get_value = \() string,
             get_cols = \() colnames(data())
           )
@@ -37,7 +37,6 @@ new_filter_block <- function(string = "TRUE", ...) {
           # Store the validated expression
           r_expr_validated <- reactiveVal(NULL)
           observe({
-            r_string_validated <- reactiveVal("")
             r_expr_validated(parse_filter())
           })
           r_string_validated <- reactiveVal(string)
@@ -46,17 +45,16 @@ new_filter_block <- function(string = "TRUE", ...) {
           observeEvent(input$submit, {
             string <- r_string()
 
-            # If empty or only whitespace, return simple mutate
-            if (all(trimws(unname(string)) == "")) {
-              expr <- parse_mutate(string)
+            # If empty or only whitespace, return simple filter
+            if (trimws(string) == "") {
+              expr <- parse_filter("")
               r_expr_validated(expr)
               return()
             }
 
             req(string)
-            stopifnot(is.character(string), !is.null(names(string)))
+            stopifnot(is.character(string))
 
-            filter_string <- glue::glue("{string}")
             expr <- try(parse_filter(string))
             # Validation
             if (inherits(expr, "try-error")) {
@@ -67,7 +65,7 @@ new_filter_block <- function(string = "TRUE", ...) {
               )
               return()
             }
-            print(expr)
+            
             data <- data()
             ans <- try(eval(expr))
             if (inherits(ans, "try-error")) {
@@ -82,11 +80,6 @@ new_filter_block <- function(string = "TRUE", ...) {
             r_string_validated(r_string())
           })
 
-          observe({
-            print(r_expr_validated())
-            print(r_string_validated())
-          })
-
           list(
             expr = r_expr_validated,
             state = list(
@@ -99,7 +92,7 @@ new_filter_block <- function(string = "TRUE", ...) {
     function(id) {
       div(
         class = "m-3",
-        mod_kvexpr_ui(NS(id, "kv")),
+        mod_vexpr_ui(NS(id, "v")),
         div(
           style = "text-align: right; margin-top: 10px;",
           actionButton(
@@ -117,8 +110,7 @@ new_filter_block <- function(string = "TRUE", ...) {
 }
 
 parse_filter <- function(filter_string = "") {
-  print(filter_string)
-  text <- if (identical(unname(filter_string), "")) {
+  text <- if (filter_string == "") {
     "dplyr::filter(data)"
   } else {
     glue::glue("dplyr::filter(data, {filter_string})")
