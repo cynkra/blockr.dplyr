@@ -20,6 +20,20 @@
 #' # With a custom dataset
 #' df <- data.frame(x = 1:5, y = letters[1:5])
 #' serve(new_filter_block(), list(data = df))
+#'
+#' serve(
+#'   new_board(
+#'     blocks = c(
+#'       b = new_filter_block(),
+#'       a = new_dataset_block()
+#'     ),
+#'     links = links(
+#'       from = c("a"),
+#'       to = c("b"),
+#'       input = c("")
+#'     )
+#'   )
+#' )
 #' }
 #' @export
 new_filter_block <- function(string = "TRUE", ...) {
