@@ -7,6 +7,24 @@
 #' @param by Column(s) tp join on
 #' @param ... Forwarded to [new_block()]
 #'
+#' @examples
+#' \dontrun{
+#' serve(
+#'   new_board(
+#'     blocks = c(
+#'       c = new_join_block(),
+#'       a = new_dataset_block(),
+#'       b = new_dataset_block()
+#'     ),
+#'     links = links(
+#'       from = c("a", "b"),
+#'       to = c("c", "c"),
+#'       input = c("x", "y")
+#'     )
+#'   )
+#' )
+#' }
+#'
 #' @export
 new_join_block <- function(type = character(), by = character(), ...) {
 
