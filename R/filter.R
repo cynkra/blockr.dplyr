@@ -21,16 +21,16 @@
 #' df <- data.frame(x = 1:5, y = letters[1:5])
 #' serve(new_filter_block(), list(data = df))
 #'
+#' # Connected blocks example
 #' serve(
 #'   new_board(
-#'     blocks = c(
-#'       b = new_filter_block(),
-#'       a = new_dataset_block()
+#'     blocks = list(
+#'       a = new_dataset_block(),
+#'       b = new_filter_block()
 #'     ),
 #'     links = links(
 #'       from = c("a"),
-#'       to = c("b"),
-#'       input = c("")
+#'       to = c("b")
 #'     )
 #'   )
 #' )
