@@ -65,7 +65,7 @@ new_filter_block <- function(string = "TRUE", ...) {
               )
               return()
             }
-            
+
             data <- data()
             ans <- try(eval(expr))
             if (inherits(ans, "try-error")) {
