@@ -16,7 +16,8 @@
 #' expr_to_cols(NULL, colnames(df))           # NULL
 #' @noRd
 expr_to_cols <- function(expr, cols) {
-  if (is.null(expr) || !nzchar(expr)) return(NULL)
+  if (is.null(expr) || length(expr) == 0) return(NULL)
+  if (!nzchar(expr)) return(NULL)
 
   # Split by comma and trim whitespace
   potential_cols <- trimws(strsplit(expr, ",")[[1]])
@@ -79,10 +80,12 @@ mod_flexpr_server <- function(
     # Update expression input when switching to expression mode
     observeEvent(input$use_expr, {
       if (isTruthy(input$use_expr)) {
+        value <- r_value()
+        if (is.null(value) || length(value) == 0) value <- ""
         shinyAce::updateAceEditor(
           session,
           "expr",
-          value = r_value()
+          value = value
         )
       }
     })
