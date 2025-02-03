@@ -18,10 +18,13 @@ new_select_block <- function(columns = character(), ...) {
           sels <- reactiveVal(columns)
           cols <- reactive(colnames(data()))
 
+          observeEvent(
+            input$columns,
+            sels(intersect(input$columns, cols()))
+          )
+
           observe(
             {
-              sels(intersect(input$columns, cols()))
-
               updateSelectInput(
                 session,
                 inputId = "columns",
