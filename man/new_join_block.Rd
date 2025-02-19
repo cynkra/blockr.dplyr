@@ -17,3 +17,22 @@ new_join_block(type = character(), by = character(), ...)
 This block allows for joining of two \code{data.frame} objects (see
 \code{\link[dplyr:mutate-joins]{dplyr::left_join()}}).
 }
+\examples{
+\dontrun{
+serve(
+  new_board(
+    blocks = c(
+      c = new_join_block(),
+      a = new_dataset_block(),
+      b = new_dataset_block()
+    ),
+    links = links(
+      from = c("a", "b"),
+      to = c("c", "c"),
+      input = c("x", "y")
+    )
+  )
+)
+}
+
+}

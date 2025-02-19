@@ -4,10 +4,10 @@
 \alias{mod_flexpr_ui}
 \title{Create flexible expression UI module}
 \usage{
-mod_flexpr_ui(ns = function(x) x)
+mod_flexpr_ui(id)
 }
 \arguments{
-\item{ns}{Namespace function}
+\item{id}{The module ID}
 }
 \value{
 A div containing the UI elements
