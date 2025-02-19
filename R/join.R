@@ -95,9 +95,6 @@ new_join_block <- function(type = character(), by = character(), ...) {
         )
       )
     },
-    dat_valid = function(x, y) {
-      stopifnot(is.data.frame(x), is.data.frame(y))
-    },
     class = "join_block",
     ...
   )
