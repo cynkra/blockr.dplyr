@@ -8,8 +8,11 @@
 #' @param ... Forwarded to [new_block()]
 #'
 #' @export
-new_join_block <- function(type = character(), by = character(), ...) {
-
+new_join_block <- function(
+  type = character(),
+  by = character(),
+  ...
+) {
   by_choices <- function(x, y) {
     intersect(colnames(x), colnames(y))
   }
@@ -30,7 +33,6 @@ new_join_block <- function(type = character(), by = character(), ...) {
       moduleServer(
         id,
         function(input, output, session) {
-
           sels <- reactiveVal(by)
           type <- reactiveVal(type)
 
@@ -39,13 +41,36 @@ new_join_block <- function(type = character(), by = character(), ...) {
 
           cols <- reactive(by_choices(x(), y()))
 
-          observe(
-            updateSelectInput(
-              session,
-              inputId = "by",
-              choices = cols(),
-              selected = sels()
-            )
+          # Make sure that when we restore with valid join columns
+          # we trigger a click on submit not to block the downstream blocks.
+          # This event must happen once, when the module function is called.
+          observeEvent(input$by, ignoreNULL = FALSE, once = TRUE, {
+            if (!is.null(input$by)) shinyjs::click("submit")
+          })
+
+          # Get submit disabled by default when no cols are selected
+          observeEvent(
+            sels(),
+            ignoreNULL = FALSE,
+            {
+              shinyjs::toggleState("submit", condition = length(sels()) > 0)
+            }
+          )
+
+          # Update by cols when upstream data change
+          observeEvent(
+            cols(),
+            {
+              # Reset sels to NULL if x and y don't have
+              # common columns
+              if (!length(cols())) sels(NULL)
+              updateSelectInput(
+                session,
+                inputId = "by",
+                choices = cols(),
+                selected = sels()
+              )
+            }
           )
 
           observe(
@@ -58,7 +83,8 @@ new_join_block <- function(type = character(), by = character(), ...) {
           )
 
           list(
-            expr = reactive(
+            expr = eventReactive(
+              input$submit,
               bquote(
                 .(func)(x, y, by = .(cols)),
                 list(
@@ -92,6 +118,11 @@ new_join_block <- function(type = character(), by = character(), ...) {
           label = "By columns",
           choices = list(),
           multiple = TRUE
+        ),
+        actionButton(
+          inputId = NS(id, "submit"),
+          label = "Submit",
+          class = "btn-primary"
         )
       )
     },
