@@ -16,7 +16,8 @@
 #' expr_to_cols(NULL, colnames(df))           # NULL
 #' @noRd
 expr_to_cols <- function(expr, cols) {
-  if (is.null(expr) || !nzchar(expr)) return(NULL)
+  if (is.null(expr) || length(expr) == 0) return(NULL)
+  if (!nzchar(expr)) return(NULL)
 
   # Split by comma and trim whitespace
   potential_cols <- trimws(strsplit(expr, ",")[[1]])
@@ -34,9 +35,8 @@ expr_to_cols <- function(expr, cols) {
 #'
 #' @param id The module ID
 #' @param get_value Function that returns initial values
-#' @param get_cols Function that returns column names for autocompletion
-#' @param get_cols_expr Function that returns column names for expression autocompletion (defaults to get_cols)
-#' @param submit Whether to show a submit button (defaults to TRUE)
+#' @param get_choices Function that returns column names for autocompletion
+#' @param get_choices_expr Function that returns column names for expression autocompletion (defaults to get_choices)
 #'
 #' @return A reactive expression containing the current expressions
 #' @importFrom shiny req showNotification NS moduleServer reactive updateSelectInput
@@ -49,16 +49,15 @@ expr_to_cols <- function(expr, cols) {
 mod_flexpr_server <- function(
   id,
   get_value,
-  get_cols,
-  get_cols_expr = get_cols,
-  submit = TRUE
+  get_choices,
+  get_choices_expr = get_choices
 ) {
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
 
     # Initialize ace editor with custom completions
     observe({
-      initialize_ace_editor(session, ns("expr"), get_cols_expr())
+      initialize_ace_editor(session, ns("expr"), get_choices_expr())
     })
 
     # Initialize reactive values
@@ -74,17 +73,19 @@ mod_flexpr_server <- function(
 
     # Set initial mode based on value format
     observe({
-      initial_mode <- !is.null(expr_to_cols(get_value(), get_cols()))
+      initial_mode <- !is.null(expr_to_cols(get_value(), get_choices()))
       updateCheckboxInput(session, "use_expr", value = !initial_mode)
     })
 
     # Update expression input when switching to expression mode
     observeEvent(input$use_expr, {
       if (isTruthy(input$use_expr)) {
+        value <- r_value()
+        if (is.null(value) || length(value) == 0) value <- ""
         shinyAce::updateAceEditor(
           session,
           "expr",
-          value = r_value()
+          value = value
         )
       }
     })
@@ -92,12 +93,12 @@ mod_flexpr_server <- function(
     # Update select input when switching to select mode
     observeEvent(input$use_expr, {
       if (!isTruthy(input$use_expr)) {
-        selected <- expr_to_cols(r_value(), get_cols())
+        selected <- expr_to_cols(r_value(), get_choices())
         if (!is.null(selected)) {
           updateSelectInput(
             session,
             "select",
-            choices = get_cols(),
+            choices = get_choices(),
             selected = selected
           )
         }
@@ -128,13 +129,16 @@ mod_flexpr_server <- function(
 
 #' Create flexible expression UI module
 #'
-#' @param ns Namespace function
+#' @param id The module ID
 #'
 #' @return A div containing the UI elements
 #' @importFrom shiny NS actionButton icon div selectInput checkboxInput
 #' @importFrom htmltools tagList tags
 #' @export
-mod_flexpr_ui <- function(ns = function(x) x) {
+mod_flexpr_ui <- function(id) {
+
+  ns <- NS(id)
+
   div(
     div(
       class = "input-group mb-3",
@@ -226,25 +230,20 @@ mod_flexpr_ui <- function(ns = function(x) x) {
 #' }
 #' @export
 run_flexpr_example <- function() {
-  df <- data.frame(x = 1:10, y = 11:20, z = 21:30)
-
   shinyApp(
     ui = bslib::page_fluid(
       theme = bslib::bs_theme(version = 5),
       shinyjs::useShinyjs(),
-      div(
-        class = "container mt-3",
-        mod_flexpr_ui(ns = NS("flexpr")),
-        verbatimTextOutput("value")
-      )
+      mod_flexpr_ui("flexpr"),
+      verbatimTextOutput("value")
     ),
     server = function(input, output, session) {
       r_ans <- mod_flexpr_server(
         "flexpr",
-        get_value = function() "x, y",
-        get_cols = function() colnames(df)
+        get_value = function() "choice1 == choice2",
+        get_choices = function() c("choice1", "choice2"),
+        get_choices_expr = function() c("choice1", "choice2", "choice3")
       )
-
       output$value <- renderPrint({
         r_ans()
       })

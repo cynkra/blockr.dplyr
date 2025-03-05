@@ -180,11 +180,8 @@ run_kvexpr_example <- function() {
         get_value = function() c(newcol = "x + 1"),
         get_cols = function() c("x", "y", "z")
       )
-
       output$value <- renderPrint({
-        val <- r_ans()
-        cat(names(val), "\n")
-        cat(sprintf('"%s"', unname(val)))
+        r_ans()
       })
     }
   )
