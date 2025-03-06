@@ -22,7 +22,10 @@
 #' serve(new_mutate_block(), list(data = df))
 #' }
 #' @export
-new_mutate_block <- function(string = c(newcol = "paste('type', 'here')"), ...) {
+new_mutate_block <- function(string = list(newcol = "paste('type', 'here')"), ...) {
+  # as discussed in https://github.com/cynkra/blockr.dplyr/issues/16
+  # the state must be a list with named elements, rather than a named vector.
+  # internally, we still work with named vectors.
   new_transform_block(
     function(id, data) {
       moduleServer(
@@ -31,7 +34,7 @@ new_mutate_block <- function(string = c(newcol = "paste('type', 'here')"), ...) 
 
           r_string <- mod_kvexpr_server(
             id = "kv",
-            get_value = \() string,
+            get_value = \() unlist(string),
             get_cols = \() colnames(data())
           )
 
@@ -91,7 +94,7 @@ new_mutate_block <- function(string = c(newcol = "paste('type', 'here')"), ...) 
           list(
             expr = r_expr_validated,
             state = list(
-              string = r_string_validated
+              string = reactive(as.list(r_string_validated()))
             )
           )
         }
