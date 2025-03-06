@@ -32,6 +32,10 @@ new_mutate_block <- function(string = list(newcol = "paste('type', 'here')"), ..
         id,
         function(input, output, session) {
 
+          observeEvent(r_string(), once = TRUE, {
+            shinyjs::delay(1000, shinyjs::click("submit"))
+          })
+
           r_string <- mod_kvexpr_server(
             id = "kv",
             get_value = \() unlist(string),
