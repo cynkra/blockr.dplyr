@@ -36,14 +36,14 @@ A `dplyr::select()` block can be spun up as
 
 ```{r select, eval = FALSE}
 library(blockr.dplyr)
-blockr.core::serve(new_select_block(c("mpg", "cyl")), list(data = mtcars))
+blockr.core::serve(new_select_block(c("mpg", "cyl")), data = list(data = mtcars))
 ```
 
 A `dplyr::mutate()` block can be used to add new variables:
 
 ```{r mutate, eval = FALSE}
 library(blockr.dplyr)
-blockr.core::serve(new_mutate_block(), list(data = mtcars))
+blockr.core::serve(new_mutate_block(), data = list(data = mtcars))
 ```
 
 And a two-table verb such as `dplyr::join()` is available as
