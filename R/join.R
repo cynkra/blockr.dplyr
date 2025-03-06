@@ -44,8 +44,8 @@ new_join_block <- function(
           # Make sure that when we restore with valid join columns
           # we trigger a click on submit not to block the downstream blocks.
           # This event must happen once, when the module function is called.
-          observeEvent(input$by, ignoreNULL = FALSE, once = TRUE, {
-            if (!is.null(input$by)) shinyjs::click("submit")
+          observeEvent(cols(), once = TRUE, {
+            shinyjs::click("submit")
           })
 
           # Get submit disabled by default when no cols are selected
