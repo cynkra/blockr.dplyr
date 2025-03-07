@@ -22,7 +22,10 @@
 #' serve(new_mutate_block(), list(data = df))
 #' }
 #' @export
-new_mutate_block <- function(string = list(newcol = "paste('type', 'here')"), ...) {
+new_mutate_block <- function(
+  string = list(newcol = "paste('type', 'here')"),
+  ...
+) {
   # as discussed in https://github.com/cynkra/blockr.dplyr/issues/16
   # the state must be a list with named elements, rather than a named vector.
   # internally, we still work with named vectors.
@@ -31,6 +34,21 @@ new_mutate_block <- function(string = list(newcol = "paste('type', 'here')"), ..
       moduleServer(
         id,
         function(input, output, session) {
+          # Restore serialized state
+          observeEvent(TRUE, {
+            # Compare default constructor string param to the one
+            # passed to the constructor when it is called.
+            if (
+              !isTRUE(all.equal(eval(formals(list(...)$ctor)$string), string))
+            ) {
+              apply_mutate(
+                data(),
+                r_string(),
+                r_expr_validated,
+                r_string_validated
+              )
+            }
+          })
 
           r_string <- mod_kvexpr_server(
             id = "kv",
@@ -40,55 +58,16 @@ new_mutate_block <- function(string = list(newcol = "paste('type', 'here')"), ..
 
           # Store the validated expression
           r_expr_validated <- reactiveVal(NULL)
-          observe({
-            r_string_validated <- reactiveVal("")
-            r_expr_validated(parse_mutate())
-          })
-          r_string_validated <- reactiveVal(string)
+          r_string_validated <- reactiveVal(NULL)
 
           # Validate and update on submit
           observeEvent(input$submit, {
-            string <- r_string()
-
-            # If empty or only whitespace, return simple mutate
-            if (all(trimws(unname(string)) == "")) {
-              expr <- parse_mutate(string)
-              r_expr_validated(expr)
-              return()
-            }
-
-            req(string)
-            stopifnot(is.character(string), !is.null(names(string)))
-
-            mutate_string <- glue::glue("{names(string)} = {unname(string)}")
-            expr <- try(parse_mutate(mutate_string))
-            # Validation
-            if (inherits(expr, "try-error")) {
-              showNotification(
-                expr,
-                type = "error",
-                duration = 5
-              )
-              return()
-            }
-            print(expr)
-            data <- data()
-            ans <- try(eval(expr))
-            if (inherits(ans, "try-error")) {
-              showNotification(
-                ans,
-                type = "error",
-                duration = 5
-              )
-              return()
-            }
-            r_expr_validated(expr)
-            r_string_validated(r_string())
-          })
-
-          observe({
-            print(r_expr_validated())
-            print(r_string_validated())
+            apply_mutate(
+              data(),
+              r_string(),
+              r_expr_validated,
+              r_string_validated
+            )
           })
 
           list(
@@ -129,4 +108,40 @@ parse_mutate <- function(mutate_string = "") {
     glue::glue("dplyr::mutate(data, {mutate_string})")
   }
   parse(text = text)[1]
+}
+
+apply_mutate <- function(data, string, r_expr_validated, r_string_validated) {
+  # If empty or only whitespace, return simple mutate
+  if (all(trimws(unname(string)) == "")) {
+    expr <- parse_mutate(string)
+    r_expr_validated(expr)
+    return()
+  }
+
+  req(string)
+  stopifnot(is.character(string), !is.null(names(string)))
+
+  mutate_string <- glue::glue("{names(string)} = {unname(string)}")
+  expr <- try(parse_mutate(mutate_string))
+  # Validation
+  if (inherits(expr, "try-error")) {
+    showNotification(
+      expr,
+      type = "error",
+      duration = 5
+    )
+    return()
+  }
+  print(expr)
+  ans <- try(eval(expr))
+  if (inherits(ans, "try-error")) {
+    showNotification(
+      ans,
+      type = "error",
+      duration = 5
+    )
+    return()
+  }
+  r_expr_validated(expr)
+  r_string_validated(string)
 }
