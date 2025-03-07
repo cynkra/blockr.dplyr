@@ -22,7 +22,10 @@
 #' serve(new_mutate_block(), list(data = df))
 #' }
 #' @export
-new_mutate_block <- function(string = list(newcol = "paste('type', 'here')"), ...) {
+new_mutate_block <- function(
+  string = list(newcol = "paste('type', 'here')"),
+  ...
+) {
   # as discussed in https://github.com/cynkra/blockr.dplyr/issues/16
   # the state must be a list with named elements, rather than a named vector.
   # internally, we still work with named vectors.
@@ -31,9 +34,14 @@ new_mutate_block <- function(string = list(newcol = "paste('type', 'here')"), ..
       moduleServer(
         id,
         function(input, output, session) {
-
-          observeEvent(r_string(), once = TRUE, {
-            shinyjs::delay(1000, shinyjs::click("submit"))
+          observeEvent(req(!is.null(input$submit)), {
+            # Compare default constructor string param to the one
+            # passed to the constructor when it is called.
+            if (
+              !isTRUE(all.equal(eval(formals(list(...)$ctor)$string), string))
+            ) {
+              shinyjs::click("submit")
+            }
           })
 
           r_string <- mod_kvexpr_server(
