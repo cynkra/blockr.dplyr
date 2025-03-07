@@ -42,6 +42,22 @@ new_filter_block <- function(string = "TRUE", ...) {
       moduleServer(
         id,
         function(input, output, session) {
+          # Restore block state
+          observeEvent(TRUE, {
+            # Compare default constructor string param to the one
+            # passed to the constructor when it is called.
+            if (
+              !isTRUE(all.equal(eval(formals(list(...)$ctor)$string), string))
+            ) {
+              apply_filter(
+                data(),
+                r_string(),
+                r_expr_validated,
+                r_string_validated
+              )
+            }
+          })
+
           r_string <- mod_vexpr_server(
             id = "v",
             get_value = \() string,
@@ -50,48 +66,16 @@ new_filter_block <- function(string = "TRUE", ...) {
 
           # Store the validated expression
           r_expr_validated <- reactiveVal(NULL)
-          observe({
-            r_expr_validated(parse_filter())
-          })
-          r_string_validated <- reactiveVal(string)
+          r_string_validated <- reactiveVal(NULL)
 
           # Validate and update on submit
           observeEvent(input$submit, {
-            string <- r_string()
-
-            # If empty or only whitespace, return simple filter
-            if (trimws(string) == "") {
-              expr <- parse_filter("")
-              r_expr_validated(expr)
-              return()
-            }
-
-            req(string)
-            stopifnot(is.character(string))
-
-            expr <- try(parse_filter(string))
-            # Validation
-            if (inherits(expr, "try-error")) {
-              showNotification(
-                expr,
-                type = "error",
-                duration = 5
-              )
-              return()
-            }
-
-            data <- data()
-            ans <- try(eval(expr))
-            if (inherits(ans, "try-error")) {
-              showNotification(
-                ans,
-                type = "error",
-                duration = 5
-              )
-              return()
-            }
-            r_expr_validated(expr)
-            r_string_validated(r_string())
+            apply_filter(
+              data(),
+              r_string(),
+              r_expr_validated,
+              r_string_validated
+            )
           })
 
           list(
@@ -130,4 +114,39 @@ parse_filter <- function(filter_string = "") {
     glue::glue("dplyr::filter(data, {filter_string})")
   }
   parse(text = text)[1]
+}
+
+apply_filter <- function(data, string, r_expr_validated, r_string_validated) {
+  # If empty or only whitespace, return simple filter
+  if (trimws(string) == "") {
+    expr <- parse_filter("")
+    r_expr_validated(expr)
+    return()
+  }
+
+  req(string)
+  stopifnot(is.character(string))
+
+  expr <- try(parse_filter(string))
+  # Validation
+  if (inherits(expr, "try-error")) {
+    showNotification(
+      expr,
+      type = "error",
+      duration = 5
+    )
+    return()
+  }
+
+  ans <- try(eval(expr))
+  if (inherits(ans, "try-error")) {
+    showNotification(
+      ans,
+      type = "error",
+      duration = 5
+    )
+    return()
+  }
+  r_expr_validated(expr)
+  r_string_validated(string)
 }
