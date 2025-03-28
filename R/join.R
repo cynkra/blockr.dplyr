@@ -37,7 +37,15 @@ new_join_block <- function(
           type <- reactiveVal(type)
 
           observeEvent(input$by, sels(input$by))
-          observeEvent(input$type, type(input$type))
+
+          observeEvent(
+            input$type,
+            {
+              if (input$type %in% join_types) {
+                type(input$type)
+              }
+            }
+          )
 
           cols <- reactive(by_choices(x(), y()))
 
